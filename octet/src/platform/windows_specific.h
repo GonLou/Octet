@@ -11,6 +11,11 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 #include <mmsystem.h>
+// added libraries
+#include <cmath>
+#include <time.h>
+#include <fstream>
+#include <conio.h>
 
 #include <ShellAPI.h> // for DragAcceptFiles etc.
 
@@ -137,6 +142,20 @@ namespace octet {
     app(int argc, char **argv) {
     }
 
+	// just to present a window with the same ratio
+	void GetDesktopResolution(int &horizontal, int &vertical)
+	{
+		RECT desktop;
+		// Get a handle to the desktop window
+		const HWND hDesktop = GetDesktopWindow();
+		// Get the size of screen to the variable desktop
+		GetWindowRect(hDesktop, &desktop);
+
+		horizontal = desktop.right;
+		vertical = desktop.bottom;
+	}
+
+
     void init() {
       WSADATA wsa;
       WSAStartup(MAKEWORD(2,2), &wsa);
@@ -154,10 +173,19 @@ namespace octet {
 
       gl_context = 0;
      
-      window_handle = CreateWindowW(L"MyClass", L"octet",
-        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 768, 768,
-        NULL, NULL, wndclass.hInstance, (LPVOID)this
-      );
+	  //to center the window with a ratio
+	  int horizontal_screen = 0;
+	  int vertical_screen = 0;
+	  const double ratio_screen = 0.80;
+
+	  GetDesktopResolution(horizontal_screen, vertical_screen);
+
+	  window_handle = CreateWindowW(L"MyClass", L"octet",
+		  WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		  ((int)horizontal_screen*ratio_screen),
+		  ((int)vertical_screen*ratio_screen),
+		  NULL, NULL, wndclass.hInstance, (LPVOID)this
+		  );
 
       map()[window_handle] = this;
 
