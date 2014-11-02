@@ -12,35 +12,51 @@ namespace octet {
 			int line;
 			int position;
 			int node;
+			float speed;
+			int time;
 
 			shape() //default constructor starts at middle line
 			{
 				line = 2;
 				position = 0;
 				node = 0;
+				speed = 0.02f;
+				time = rand() % 110 + 1;
 			}
 
-			shape(int line, int position, int node)
+			shape(int line, int position, int node, int time)
 			{
-				line = line;
-				position = position;
-				node = node;
+				this->line = line;
+				this->position = position;
+				this->node = node;
+				this->speed = 0.02f;
+				this->time = time;
 			}
 
 			// set
 			void set_line(int line)
 			{
-				line = line;
+				this->line = line;
 			}
 
 			void set_position(int pos)
 			{
-				position = pos;
+				this->position = pos;
 			}
 
 			void set_node(int node)
 			{
-				node = node;
+				this->node = node;
+			}
+
+			void set_speed(int speed)
+			{
+				this->speed = speed;
+			}
+
+			void set_time(int time)
+			{
+				this->time = time;
 			}
 
 			// get
@@ -59,18 +75,34 @@ namespace octet {
 				return position;
 			}
 
+			int get_speed()
+			{
+				return speed;
+			}
+
+			int get_time()
+			{
+				return time;
+			}
+
 			// move the shapes
 			void move(int node, ref<visual_scene> app_scene)
 			{
 				scene_node *move = app_scene->get_mesh_instance(node)->get_node();
-				move->translate(vec3(0, 0, 1));
-				//inc_position();
+				//move->translate(vec3(0, 0, this->get_speed()));
+				move->translate(vec3(0, 0, 0.5f));
+				inc_position();
 			}
 
 			// increment position
 			void inc_position()
 			{
 				position = position + 1;
+			}
+
+			void inc_speed()
+			{
+				speed = speed + 0.2f;
 			}
 
 		};

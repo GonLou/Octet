@@ -16,58 +16,73 @@ namespace octet {
 			boolean sound;
 			int lives;
 			int ship_location;
+			int timer;
+			int number_objects;
 
 			engine() // default constructor
 			{
-				count_cubes = 0;
-				count_spheres = 0;
-				count_cylinders = 0;
-				active_shape = 1;
-				sound = false;
-				lives = 3;
-				ship_location = 0;
+				this->count_cubes = 0;
+				this->count_spheres = 0;
+				this->count_cylinders = 0;
+				this->active_shape = 1;
+				this->sound = false;
+				this->lives = 3;
+				this->ship_location = 0;
+				this->timer = 0;
+				this->number_objects = 20;
 			}
 
 			// set
 			void set_cubes(int count_cubes)
 			{
-				count_cubes = count_cubes;
+				this->count_cubes = count_cubes;
 			}
 
 			void set_spheres(int count_spheres)
 			{
-				count_spheres = count_spheres;
+				this->count_spheres = count_spheres;
 			}
 
 			void set_cylinders(int count_cylinders)
 			{
-				count_cylinders = count_cylinders;
+				this->count_cylinders = count_cylinders;
 			}
 
 			void set_lives(int lives)
 			{
-				lives = lives;
+				this->lives = lives;
 			}
 
 			void set_sound_on()
 			{
-				sound = true;
+				this->sound = true;
 			}
 
 			void set_sound_off()
 			{
-				sound = false;
+				this->sound = false;
 			}
 
 			void set_ship_location(int ship_location)
 			{
-				ship_location = ship_location;
+				this->ship_location = ship_location;
 			}
 
 			void set_active_shape(int active_shape)
 			{
-				active_shape = active_shape;
+				this->active_shape = active_shape;
 			}
+
+			void set_timer(int timer)
+			{
+				this->timer = timer;
+			}
+
+			void set_number_objects(int number_objects)
+			{
+				this->number_objects = number_objects;
+			}
+
 			// get
 			int get_cubes()
 			{
@@ -123,6 +138,16 @@ namespace octet {
 				return ship_location;
 			}
 
+			int get_timer()
+			{
+				return timer;
+			}
+
+			int get_number_objects()
+			{
+				return number_objects;
+			}
+
 			// increment shapes
 			void inc_cubes()
 			{
@@ -142,6 +167,11 @@ namespace octet {
 			void inc_ship_location()
 			{
 				ship_location = ship_location + 1;
+			}
+
+			void inc_timer()
+			{
+				timer = timer + 1;
 			}
 
 			// decrement lives

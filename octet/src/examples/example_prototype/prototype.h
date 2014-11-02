@@ -4,6 +4,10 @@
 //
 // Modular Framework for OpenGLES2 rendering on multiple platforms.
 //
+// Adapted by 
+//				Goncalo Lourenco
+//
+// Octet Game Shape
 
 #include "shape.h"
 
@@ -12,16 +16,16 @@
 //#include "play_sound.h"
 
 namespace octet {
-	/// Scene containing a box with octet.
+	/// Octet Shape Game
 
 	class prototype : public app {
-		// scene for drawing box
+		// scene for the game
 		ref<visual_scene> app_scene;
 		dynarray<scene_node*> nodes;
 		collada_builder loader;
 
 		// track of objects from game
-		ref<shape> object_tracking[20];
+		ref<shape> object_tracking[40]; 
 
 		// variables for the game
 		ref<engine> start;
@@ -59,8 +63,6 @@ namespace octet {
 			scene_node *node = new scene_node(modelToWorld, atom_);
 			nodes.push_back(node);
 
-			//node->rotate(-90, vec3(1, 0, 0));
-			//node->translate(vec3(-1, 0, 0));
 			app_scene->add_child(node);
 			app_scene->add_mesh_instance(new mesh_instance(node, cylinder, mat));
 		}
@@ -154,6 +156,7 @@ namespace octet {
 			// define the vertical line alignment position
 			int a_line[3] = { -3, 0, 3 };
 			int a_line_negative[3] = { 3, 0, -3 };
+			int timer;
 			modelToWorld.translate(a_line[line-1], 2.0, -30.0);
 
 			// define the object shape type
@@ -173,12 +176,8 @@ namespace octet {
 
 			// gain back the position
 			modelToWorld.translate(a_line_negative[line-1], -2.0f, 30.0f);
-
-			//object_tracking[index] = new shape(line, 0, (int)nodes.size());
-			/*object_tracking[index] = new shape();*/
-			object_tracking[index]->set_line(line);
-			object_tracking[index]->set_node((int)nodes.size());
-			printf("nodes size: %d", object_tracking[index]->get_node());
+			timer = rand() % (start->get_number_objects() * 50) + 1;
+			object_tracking[index] = new shape(line, 0, (int)nodes.size(), timer);
 		}
 
 
@@ -192,6 +191,13 @@ namespace octet {
 			app_scene = new visual_scene();
 			app_scene->create_default_camera_and_lights();
 			app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 5, 0));
+
+			// initialize all engine variables
+			start = new engine();
+
+			start->set_number_objects(40);
+
+			object_tracking[start->get_number_objects()];
 
 			// load sounds
 			/*play_sound background_music("../../../assets/gonkas/music.wav");
@@ -240,12 +246,11 @@ namespace octet {
 			int line;
 			srand(time(NULL)); // initialize random seed
 
-			for (unsigned i = 0; i < 20; i++)
+			for (unsigned i = 0; i < start->get_number_objects(); i++)
 			{
 				color = rand() % 3 + 1;
 				shape_type = rand() % 3 + 1;
 				line = rand() % 3 + 1;
-				object_tracking[i] = new shape();
 				create_shape(i, color, shape_type, line);
 			}
 
@@ -261,9 +266,6 @@ namespace octet {
 			overlay->add_mesh_text(text_left);
 			overlay->add_mesh_text(text_right);
 
-			// initialize all engine variables
-			start = new engine();
-
 		}
 
 		/// this is called to draw the world
@@ -271,6 +273,8 @@ namespace octet {
 			int vx = 0, vy = 0;
 			get_viewport_size(vx, vy);
 			app_scene->begin_render(vx, vy);
+
+			start->inc_timer();
 
 			{  	// >>> begin keyboard
 
@@ -284,7 +288,6 @@ namespace octet {
 						if (start->get_ship_location() <= -12)
 						{
 							ship_controller->translate(vec3(0, 0.3f, 0));
-							//start->set_ship_location(-12);*/
 							start->inc_ship_location();
 						}
 					}
@@ -294,7 +297,6 @@ namespace octet {
 						if (start->get_ship_location() >= 12)
 						{
 							ship_controller->translate(vec3(0, -0.3f, 0));
-							//start->set_ship_location(12);
 							start->dec_ship_location();
 						}
 					}
@@ -333,12 +335,9 @@ namespace octet {
 
 			} // end keyboard <<<
 
-			for (unsigned i = 0; i < 20; ++i) {
-				//object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
-				/*printf("nodes %d\n", object_tracking[i]->&get_node());
-				printf("pos %d\n", object_tracking[i]->get_position());
-				printf("line %d\n", object_tracking[i]->get_line());
-				Sleep(1000);*/
+			for (unsigned i = 0; i < (start->get_number_objects()-1); ++i) {
+				if (object_tracking[i]->get_time() < start->get_timer())
+					object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
 			}
 	
 			// update matrices. assume 30 fps.
@@ -354,7 +353,7 @@ namespace octet {
 				"active shape: %s\nobjects collected:\n\t\tCube     -> %d\n\t\tSphere   -> %d\n\t\tCylinder -> %d\n",
 				start->get_active_shape_text(), start->get_cubes(), start->get_spheres(), start->get_cylinders()
 				);
-			text_right->format("lives %d\n%s", start->get_lives(), start->get_sound());
+			text_right->format("lives %d\n%s\n%d", start->get_lives(), start->get_sound(), start->get_timer());
 			text_left->update();
 			text_right->update(); // convert it to a mesh.
 			overlay->render(vx, vy); // draw the text overlay
