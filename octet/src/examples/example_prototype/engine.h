@@ -86,22 +86,22 @@ namespace octet {
 			// get
 			int get_cubes()
 			{
-				return count_cubes;
+				return this->count_cubes;
 			}
 
 			int get_spheres()
 			{
-				return count_spheres;
+				return this->count_spheres;
 			}
 
 			int get_cylinders()
 			{
-				return count_cylinders;
+				return this->count_cylinders;
 			}
 
 			int get_active_shape()
 			{
-				return active_shape;
+				return this->active_shape;
 			}
 
 			string get_active_shape_text()
@@ -122,7 +122,7 @@ namespace octet {
 
 			int get_lives()
 			{
-				return lives;
+				return this->lives;
 			}
 
 			string get_sound()
@@ -135,54 +135,110 @@ namespace octet {
 
 			int get_ship_location()
 			{
-				return ship_location;
+				return this->ship_location;
 			}
 
 			int get_timer()
 			{
-				return timer;
+				return this->timer;
 			}
 
 			int get_number_objects()
 			{
-				return number_objects;
+				return this->number_objects;
 			}
 
 			// increment shapes
 			void inc_cubes()
 			{
-				count_cubes = count_cubes + 1;
+				this->count_cubes = this->count_cubes + 1;
 			}
 
 			void inc_spheres()
 			{
-				count_spheres = count_spheres + 1;
+				this->count_spheres = this->count_spheres + 1;
 			}
 
 			void inc_cylinders()
 			{
-				count_cylinders = count_cylinders + 1;
+				this->count_cylinders = this->count_cylinders + 1;
 			}
 
 			void inc_ship_location()
 			{
-				ship_location = ship_location + 1;
+				this->ship_location = this->ship_location + 1;
 			}
 
 			void inc_timer()
 			{
-				timer = timer + 1;
+				this->timer = this->timer + 1;
 			}
 
 			// decrement lives
 			void dec_lives()
 			{
-				lives = lives - 1;
+				this->lives = this->lives - 1;
 			}
 
 			void dec_ship_location()
 			{
-				ship_location = ship_location - 1;
+				this->ship_location = this->ship_location - 1;
+			}
+
+			// check collisions
+			boolean collision(int o_line)
+			{
+				int s_pos;
+
+				if (get_ship_location() <= -4)
+					s_pos = 1;
+				else if(get_ship_location() >= 4)
+					s_pos = 3;
+				else
+					s_pos = 2;
+
+				if (o_line == s_pos)
+					return true;
+				else
+					return false;
+			}
+
+			int get_ship_location_t()
+			{
+
+				if (get_ship_location() <= -4)
+					return  1;
+				else if (get_ship_location() >= 4)
+					return 3;
+				else
+					return 2;
+
+			}
+
+			// check if the object is the one that is highlighted
+			boolean good_object(int o_shape)
+			{
+				if (get_active_shape() == o_shape)
+					return true;
+				else
+					return false;
+			}
+
+			// increment the shapes value if catch the correct shape
+			void process_shape(int o_shape)
+			{
+				switch (o_shape)
+				{
+				case 1:
+					inc_cubes();
+					break;
+				case 2:
+					inc_spheres();
+					break;
+				case 3:
+					inc_cylinders();
+					break;
+				}
 			}
 
 		};

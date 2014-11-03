@@ -14,23 +14,29 @@ namespace octet {
 			int node;
 			float speed;
 			int time;
+			int shape_type;
+			boolean is_alive;
 
 			shape() //default constructor starts at middle line
 			{
-				line = 2;
+				line = 1;
 				position = 0;
 				node = 0;
 				speed = 0.02f;
 				time = rand() % 110 + 1;
+				shape_type = 1;
+				is_alive = true;
 			}
 
-			shape(int line, int position, int node, int time)
+			shape(int line, int node, int time, int shape_type)
 			{
 				this->line = line;
-				this->position = position;
+				this->position = 0;
 				this->node = node;
 				this->speed = 0.02f;
 				this->time = time;
+				this->shape_type = shape_type;
+				this->is_alive = true;
 			}
 
 			// set
@@ -59,30 +65,50 @@ namespace octet {
 				this->time = time;
 			}
 
+			void set_shape_type(int shape_type)
+			{
+				this->shape_type = shape_type;
+			}
+
+			void set_is_alive(int is_alive)
+			{
+				this->is_alive = is_alive;
+			}
+
 			// get
 			int get_line()
 			{
-				return line;
+				return this->line;
 			}
 
 			int get_node()
 			{
-				return node;
+				return this->node;
 			}
 
 			int get_position()
 			{
-				return position;
+				return this->position;
 			}
 
 			int get_speed()
 			{
-				return speed;
+				return this->speed;
 			}
 
 			int get_time()
 			{
-				return time;
+				return this->time;
+			}
+
+			int get_shape_type()
+			{
+				return this->shape_type;
+			}
+
+			boolean get_is_alive()
+			{
+				return this->is_alive;
 			}
 
 			// move the shapes
@@ -97,12 +123,12 @@ namespace octet {
 			// increment position
 			void inc_position()
 			{
-				position = position + 1;
+				this->position = this->position + 1;
 			}
 
 			void inc_speed()
 			{
-				speed = speed + 0.2f;
+				this->speed = this->speed + 0.2f;
 			}
 
 		};

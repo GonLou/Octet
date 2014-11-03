@@ -25,7 +25,7 @@ namespace octet {
 		collada_builder loader;
 
 		// track of objects from game
-		ref<shape> object_tracking[40]; 
+		ref<shape> object_tracking[20]; 
 
 		// variables for the game
 		ref<engine> start;
@@ -128,14 +128,14 @@ namespace octet {
 			delete[] p2DArray;
 
 		}
-		
-		//void create_shape(int color, int shape_type, int line)
+
+		// create the random shapes with random colors and random vertical positions
 		void create_shape(int index, int color, int shape_type, int line)
 		{
 			mat4t modelToWorld;
-			//modelToWorld.translate(-14.30f, -1.0f, 25.0f);
-			//param_shader *shader = new param_shader("shaders/default.vs", "shaders/gonkas.fs");
+			int object_time;
 
+			//param_shader *shader = new param_shader("shaders/default.vs", "shaders/gonkas.fs");
 			// define the object color
 			vec4 o_color;
 			switch (color)
@@ -154,10 +154,19 @@ namespace octet {
 			material *m_color = new material(o_color);
 
 			// define the vertical line alignment position
-			int a_line[3] = { -3, 0, 3 };
-			int a_line_negative[3] = { 3, 0, -3 };
-			int timer;
-			modelToWorld.translate(a_line[line-1], 2.0, -30.0);
+			switch (line)
+			{
+			case 1: // left
+				modelToWorld.translate(-3.0f, 2.0f, -50.0f);
+				break;
+			case 2: // center
+				modelToWorld.translate(0.0f, 2.0f, -50.0f);
+				break;
+			case 3: // right
+			default:
+				modelToWorld.translate(3.0f, 2.0f, -50.0f);
+				break;
+			}
 
 			// define the object shape type
 			switch (shape_type)
@@ -174,12 +183,11 @@ namespace octet {
 				break;
 			}
 
-			// gain back the position
-			modelToWorld.translate(a_line_negative[line-1], -2.0f, 30.0f);
-			timer = rand() % (start->get_number_objects() * 50) + 1;
-			object_tracking[index] = new shape(line, 0, (int)nodes.size(), timer);
+			//modelToWorld.translate(a_line_negative[line-1], -2.0f, 1000.0f);
+			object_time = rand() % (start->get_number_objects() * 50) + 1;
+			//shape(int line, int position, int node, int object_time, int shape_type)
+			object_tracking[index] = new shape(line, (int)nodes.size(), object_time, 1);
 		}
-
 
 	public:
 		/// this is called when we construct the class before everything is initialised.
@@ -195,9 +203,9 @@ namespace octet {
 			// initialize all engine variables
 			start = new engine();
 
-			start->set_number_objects(40);
+			start->set_number_objects(20);
 
-			object_tracking[start->get_number_objects()];
+			//object_tracking[start->get_number_objects()];
 
 			// load sounds
 			/*play_sound background_music("../../../assets/gonkas/music.wav");
@@ -246,12 +254,12 @@ namespace octet {
 			int line;
 			srand(time(NULL)); // initialize random seed
 
-			for (unsigned i = 0; i < start->get_number_objects(); i++)
+			for (unsigned j = 0; j < start->get_number_objects(); j++)
 			{
 				color = rand() % 3 + 1;
 				shape_type = rand() % 3 + 1;
 				line = rand() % 3 + 1;
-				create_shape(i, color, shape_type, line);
+				create_shape(j, color, shape_type, line);
 			}
 
 			// text creation
@@ -304,13 +312,6 @@ namespace octet {
 
 				//camera controls
 				scene_node *cam_node = app_scene->get_camera_instance(0)->get_node();
-				if (app::is_key_down('W')) {
-					//shake();
-					//cam_node->translate(vec3(0, 0, -1));
-				}
-				/*if (app::is_key_down('S')) {
-					cam_node->translate(vec3(0, 0, 1));
-				}*/
 				if (app::is_key_down('A')) {
 					cam_node->rotate(5, vec3(0, 1, 0));
 				}
@@ -336,9 +337,28 @@ namespace octet {
 			} // end keyboard <<<
 
 			for (unsigned i = 0; i < (start->get_number_objects()-1); ++i) {
-				if (object_tracking[i]->get_time() < start->get_timer())
+
+				if (object_tracking[i]->get_time() < start->get_timer()) // if its time for the object to move
 					object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
+
+				if (object_tracking[i]->get_position() > 150 && object_tracking[i]->get_is_alive()) // if is at the space ship zone verifies collision
+				{
+					object_tracking[i]->set_is_alive(false);
+					printf("line object: %d = %d \tship location: %d\n", i, object_tracking[i]->get_line(), start->get_ship_location_t());
+					if (start->collision(object_tracking[i]->get_line())) // verifies if collision occur
+					{
+						/*printf("shape\n");
+						printf("ot line: %d\nship location: %d\n", object_tracking[i]->get_line(), start->get_ship_location());*/
+						if (start->good_object(object_tracking[i]->get_shape_type())) // verifies if shape is the demanded
+							start->process_shape(object_tracking[i]->get_shape_type()); // increment shape counter
+						else
+							start->dec_lives(); // decrement live
+					}
+				}
 			}
+
+			if (start->get_lives() < 0)
+				exit(0);
 	
 			// update matrices. assume 30 fps.
 			app_scene->update(1.0f / 30);
@@ -353,7 +373,8 @@ namespace octet {
 				"active shape: %s\nobjects collected:\n\t\tCube     -> %d\n\t\tSphere   -> %d\n\t\tCylinder -> %d\n",
 				start->get_active_shape_text(), start->get_cubes(), start->get_spheres(), start->get_cylinders()
 				);
-			text_right->format("lives %d\n%s\n%d", start->get_lives(), start->get_sound(), start->get_timer());
+			text_right->format("lives %d\n%s\n%d", start->get_lives(), start->get_sound(), start->get_ship_location_t());
+			//text_right->format("lives %d\n%s\n%d", start->get_lives(), start->get_sound(), object_tracking[0]->get_position());
 			text_left->update();
 			text_right->update(); // convert it to a mesh.
 			overlay->render(vx, vy); // draw the text overlay
