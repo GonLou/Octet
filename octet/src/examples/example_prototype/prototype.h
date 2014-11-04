@@ -9,11 +9,11 @@
 //
 // Octet Game Shape
 
+#include <vector>
+
 #include "shape.h"
 
 #include "engine.h"
-
-//#include "play_sound.h"
 
 namespace octet {
 	/// Octet Shape Game
@@ -26,10 +26,11 @@ namespace octet {
 
 		// track of objects from game
 		ref<shape> object_tracking[20]; 
+		std::vector<shape> ot;
 
 		// variables for the game
 		ref<engine> start;
-
+		
 		// helper for drawing text
 		ref<text_overlay> overlay;
 
@@ -205,15 +206,6 @@ namespace octet {
 
 			start->set_number_objects(20);
 
-			//object_tracking[start->get_number_objects()];
-
-			// load sounds
-			/*play_sound background_music("../../../assets/gonkas/music.wav");
-			play_sound colect("../../../assets/gonkas/colect.wav");
-			play_sound collide("../../../assets/gonkas/collide.wav");
-			play_sound explosion("../../../assets/gonkas/explosion.wav");
-			play_sound objective("../../../assets/gonkas/objective.wav");*/
-
 			mat4t modelToWorld;
 
 			image *img01 = new image("assets/gonkas/ground_texture.jpg");
@@ -254,7 +246,7 @@ namespace octet {
 			int line;
 			srand(time(NULL)); // initialize random seed
 
-			for (unsigned j = 0; j < start->get_number_objects(); j++)
+			for (int j = 0; j < start->get_number_objects(); j++)
 			{
 				color = rand() % 3 + 1;
 				shape_type = rand() % 3 + 1;
@@ -336,7 +328,7 @@ namespace octet {
 
 			} // end keyboard <<<
 
-			for (unsigned i = 0; i < (start->get_number_objects()-1); ++i) {
+			for (int i = 0; i < (start->get_number_objects()-1); ++i) {
 
 				if (object_tracking[i]->get_time() < start->get_timer()) // if its time for the object to move
 					object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
@@ -350,15 +342,24 @@ namespace octet {
 						/*printf("shape\n");
 						printf("ot line: %d\nship location: %d\n", object_tracking[i]->get_line(), start->get_ship_location());*/
 						if (start->good_object(object_tracking[i]->get_shape_type())) // verifies if shape is the demanded
+						{
 							start->process_shape(object_tracking[i]->get_shape_type()); // increment shape counter
+							PlaySound(TEXT("../../../assets/gonkas/collect.wav"), NULL, SND_FILENAME | SND_ASYNC);
+						}
 						else
+						{
 							start->dec_lives(); // decrement live
+							PlaySound(TEXT("../../../assets/gonkas/collide.wav"), NULL, SND_FILENAME | SND_ASYNC);
+						}
 					}
 				}
 			}
 
 			if (start->get_lives() < 0)
+			{
+				PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
 				exit(0);
+			}
 	
 			// update matrices. assume 30 fps.
 			app_scene->update(1.0f / 30);
