@@ -20,6 +20,7 @@ namespace octet {
 			int number_objects;
 			boolean game_start;
 			int points;
+			int camera_orientation;
 
 			engine() // default constructor
 			{
@@ -34,6 +35,7 @@ namespace octet {
 				this->number_objects = 20;
 				this->game_start = false;
 				this->points = 0;
+				this->camera_orientation = 0;
 			}
 
 			// set
@@ -95,6 +97,10 @@ namespace octet {
 			void set_points(int points)
 			{
 				this->points = points;
+			}
+
+			void set_camera_orientation(int camera_orientation) {
+				this->camera_orientation = camera_orientation;
 			}
 
 			// get
@@ -180,6 +186,10 @@ namespace octet {
 			int get_points()
 			{
 				return this->points;
+			}
+
+			int get_camera_orientation() {
+				return this->camera_orientation;
 			}
 
 			// increment shapes

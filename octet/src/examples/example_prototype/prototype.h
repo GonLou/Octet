@@ -285,7 +285,7 @@ namespace octet {
 					scene_node *ship_controller = app_scene->get_mesh_instance(6)->get_node();
 					if (start->get_ship_location() >= -12 && start->get_ship_location() <= 12)
 					{
-						if (app::is_key_down(key_left)) {
+						if (app::is_key_down(key_left) || app::is_key_going_up(key_left)) {
 							start->dec_ship_location();
 							ship_controller->translate(vec3(0, -0.3f, 0));
 							if (start->get_ship_location() <= -12)
@@ -293,8 +293,9 @@ namespace octet {
 								ship_controller->translate(vec3(0, 0.3f, 0));
 								start->inc_ship_location();
 							}
+
 						}
-						if (app::is_key_down(key_right )) {
+						if (app::is_key_down(key_right) || app::is_key_going_up(key_right)) {
 							start->inc_ship_location();
 							ship_controller->translate(vec3(0, 0.3f, 0));
 							if (start->get_ship_location() >= 12)
@@ -309,9 +310,19 @@ namespace octet {
 					scene_node *cam_node = app_scene->get_camera_instance(0)->get_node();
 					if (app::is_key_down('A')) {
 						cam_node->rotate(5, vec3(0, 1, 0));
+						start->set_camera_orientation(start->get_camera_orientation() + 1);
+					}
+					if (app::is_key_up('A')) {
+						cam_node->rotate(-5 * start->get_camera_orientation(), vec3(0, 1, 0));
+						start->set_camera_orientation(0);
 					}
 					if (app::is_key_down('D')) {
 						cam_node->rotate(-5, vec3(0, 1, 0));
+						start->set_camera_orientation(start->get_camera_orientation() + 1);
+					}
+					if (app::is_key_up('D')) {
+						cam_node->rotate(5 * start->get_camera_orientation(), vec3(0, 1, 0));
+						start->set_camera_orientation(0);
 					}
 
 					// toggle sound
@@ -360,7 +371,7 @@ namespace octet {
 								object_tracking[i]->fade(object_tracking[i]->get_node(), app_scene);
 								object_tracking[i]->set_is_alive(false);
 								start->set_number_objects(start->get_number_objects() - 1);
-								start->set_points(((start->get_lives()+1)*10 + 100)+start->get_points());
+								start->set_points(((start->get_lives())*2 * 10)+start->get_points());
 							}
 							else
 							{
