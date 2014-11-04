@@ -7,7 +7,8 @@
 // Adapted by 
 //				Goncalo Lourenco
 //
-// Octet Game Shape
+//              Octet Shape Game 
+
 using namespace std;
 
 #include <vector>
@@ -39,6 +40,8 @@ namespace octet {
 		ref<mesh_text> text_left;
 		ref<mesh_text> text_center;
 		ref<mesh_text> text_right;
+
+		int const TOTAL_OBJECTS = 40;
 
 		//construct a box
 		void add_box(mat4t_in modelToWorld, vec3_in size, material *mat) {
@@ -163,12 +166,14 @@ namespace octet {
 			// initialize all engine variables
 			start = new engine();
 
-			start->set_number_objects(20);
+			start->set_number_objects(TOTAL_OBJECTS);
+
+			start->set_sound_on();
 
 			mat4t modelToWorld;
 
-			image *img01 = new image("assets/gonkas/ground_texture.jpg");
-			material *world_ground_material = new material(img01);
+			image *ground_image = new image("assets/gonkas/ground_texture.jpg");
+			material *world_ground_material = new material(ground_image);
 
 			// create sky environment
 			material *blue_sky = new material(vec4(0.5f, 0.5f, 1.0f, 1));
@@ -212,28 +217,20 @@ namespace octet {
 				shape_type = (int) rand() % 3 + 1;
 				object_time = (int)rand() % (start->get_number_objects()*50) + 1;
 				line = (int) rand() % 3 + 1;
-
-				printf(" object_time= %d || color = %d || line = %d || shape_type = %d \n", object_time, color, line, shape_type);
 				create_shape(color, shape_type, object_time, line);
-				//create_shape(3, 3, object_time, 1);
-				
-				printf("id = %d  ||", j);
-				printf("color = %d  ||", object_tracking[j]->get_color());
-				printf("line = %d  ||", object_tracking[j]->get_line());
-				printf("  shape type =  %d\n", object_tracking[j]->get_shape_type());
-				//printf("  color =  %d\n", object_tracking[j]->get_color());
-				printf("\n");
-
 			}
-			
+
+			/*for (unsigned i = 0; i < (object_tracking.size()-1); ++i)
+			printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());*/
+
 			// text creation
 			overlay = new text_overlay(); // create the overlay
 			bitmap_font *font = overlay->get_default_font(); // get the default font.
 			// create a box containing text (in pixels)
 			aabb bb(vec3(100.0f, 100.0f, 0.0f), vec3(600, 150, 0));
 			text_left = new mesh_text(font, "", &bb);
-			aabb ab(vec3(300.0f, 100.0f, 0.0f), vec3(200, 50, 0));
-			text_center = new mesh_text(font, "Octet Shape Game\n\n\n [S]tart a Game\n\n[E]xit", &ab);
+			aabb ab(vec3(150.0f, 100.0f, 0.0f), vec3(200, 150, 0));
+			text_center = new mesh_text(font, "", &ab);
 			aabb aa(vec3(500.0f, 100.0f, 0.0f), vec3(100, 150, 0));
 			text_right = new mesh_text(font, "", &aa);
 			// add the mesh to the overlay.
@@ -241,141 +238,161 @@ namespace octet {
 			overlay->add_mesh_text(text_center);
 			overlay->add_mesh_text(text_right);
 
+			// play the background music
+			//PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
+
+		}
+
+		void display_text(ref<engine> start, string mid_text, int vx, int vy)
+		{
+			// clear the text
+			text_left->clear();
+			text_center->clear();
+			text_right->clear();
+			// format the text
+			text_left->format(
+				"active shape: %s\nobjects collected:\n\t\tCube     -> %d\n\t\tSphere   -> %d\n\t\tCylinder -> %d\n",
+				start->get_active_shape_text(), start->get_cubes(), start->get_spheres(), start->get_cylinders()
+				);
+			text_center->format("%s", mid_text);
+			text_right->format("lives %d\n%s\n", start->get_lives(), start->get_sound());
+			// convert it to a mesh.
+			text_left->update();
+			text_center->update();
+			text_right->update(); 
+			overlay->render(vx, vy); // draw the text overlay
 		}
 
 		/// this is called to draw the world
-		void draw_world(int x, int y, int w, int h) {
+		void draw_world(int x, int y, int w, int h) 
+		{
 			int vx = 0, vy = 0;
 			get_viewport_size(vx, vy);
 			app_scene->begin_render(vx, vy);
 
-			start->inc_timer();
+			if (start->get_start_game())
+			{
+				start->inc_timer();
 
-			{  	// >>> begin keyboard
+				{  	// >>> begin keyboard
 
-				//ship controls
-				scene_node *ship_controller = app_scene->get_mesh_instance(6)->get_node();
-				if (start->get_ship_location() >= -12 && start->get_ship_location() <= 12)
-				{
-					if (app::is_key_down(key_left)) {
-						start->dec_ship_location();
-						ship_controller->translate(vec3(0, -0.3f, 0));
-						if (start->get_ship_location() <= -12)
-						{
-							ship_controller->translate(vec3(0, 0.3f, 0));
-							start->inc_ship_location();
-						}
-					}
-					if (app::is_key_down(key_right )) {
-						start->inc_ship_location();
-						ship_controller->translate(vec3(0, 0.3f, 0));
-						if (start->get_ship_location() >= 12)
-						{
-							ship_controller->translate(vec3(0, -0.3f, 0));
+					//ship controls
+					scene_node *ship_controller = app_scene->get_mesh_instance(6)->get_node();
+					if (start->get_ship_location() >= -12 && start->get_ship_location() <= 12)
+					{
+						if (app::is_key_down(key_left)) {
 							start->dec_ship_location();
+							ship_controller->translate(vec3(0, -0.3f, 0));
+							if (start->get_ship_location() <= -12)
+							{
+								ship_controller->translate(vec3(0, 0.3f, 0));
+								start->inc_ship_location();
+							}
+						}
+						if (app::is_key_down(key_right )) {
+							start->inc_ship_location();
+							ship_controller->translate(vec3(0, 0.3f, 0));
+							if (start->get_ship_location() >= 12)
+							{
+								ship_controller->translate(vec3(0, -0.3f, 0));
+								start->dec_ship_location();
+							}
+						}
+					}
+
+					//camera controls
+					scene_node *cam_node = app_scene->get_camera_instance(0)->get_node();
+					if (app::is_key_down('A')) {
+						cam_node->rotate(5, vec3(0, 1, 0));
+					}
+					if (app::is_key_down('D')) {
+						cam_node->rotate(-5, vec3(0, 1, 0));
+					}
+
+					// toggle sound
+					if (app::is_key_down('M')) {
+						start->set_sound_on();
+					}
+					if (app::is_key_down('N')) {			
+						PlaySound(NULL, 0, SND_ASYNC);
+						start->set_sound_off();
+					}
+
+					// quit
+					if (app::is_key_down('Q')) {
+						exit(0);
+					}
+
+				} // end keyboard <<<
+
+				/*for (unsigned i = 0; i < (object_tracking.size()-1); ++i) 
+					printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());*/
+
+				for (unsigned i = 0; i < (object_tracking.size()); ++i)
+				{
+
+					if (object_tracking[i]->get_time() < start->get_timer()) // if its time for the object to move
+					{
+						object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
+						printf("speed %f\n", object_tracking[i]->get_speed());
+					}
+
+					if (object_tracking[i]->get_position() > 140 && object_tracking[i]->get_is_alive()) // if is at the space ship zone verifies collision
+					{
+						object_tracking[i]->set_is_alive(false);
+						if (start->get_ship_location_transform() == object_tracking[i]->get_line()) // verifies if collision occur
+						{
+							if (start->get_active_shape() == object_tracking[i]->get_shape_type()) // verifies if shape is the demanded
+							{
+								start->process_shape(object_tracking[i]->get_shape_type()); // increment shape counter
+								PlaySound(TEXT("../../../assets/gonkas/collect.wav"), NULL, SND_FILENAME | SND_ASYNC);
+							}
+							else
+							{
+								start->dec_lives(); // decrement live
+								PlaySound(TEXT("../../../assets/gonkas/collide.wav"), NULL, SND_FILENAME | SND_ASYNC);
+							}
 						}
 					}
 				}
 
-				//camera controls
-				scene_node *cam_node = app_scene->get_camera_instance(0)->get_node();
-				if (app::is_key_down('A')) {
-					cam_node->rotate(5, vec3(0, 1, 0));
-				}
-				if (app::is_key_down('D')) {
-					cam_node->rotate(-5, vec3(0, 1, 0));
-				}
-
-				// toggle sound
-				if (app::is_key_down('M')) {
-					PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
-					start->set_sound_on();
-				}
-				if (app::is_key_down('N')) {			
-					PlaySound(NULL, 0, SND_ASYNC);
-					//NULL, 0, SND_ASYNC
-					start->set_sound_off();
-				}
-
-				// quit
-				if (app::is_key_down('Q')) {
-					/*text_center->clear();
-					text_center->format("You are about to quit the game [Y]es or [N]o?");
-					text_center->update();
-					overlay->render(vx, vy);*/
+				if (start->get_lives() < 0)
+				{
+					PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
 					//getch(); // wait for a key get pressed
 					exit(0);
 				}
 
-			} // end keyboard <<<
+				// display text
+				display_text(start, "", vx, vy);
 
-			/*for (unsigned i = 0; i < (object_tracking.size()-1); ++i) 
-				printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());*/
-
-			for (unsigned i = 0; i < (object_tracking.size()); ++i) 
+			}
+			else // if game not started
 			{
-
-				if (object_tracking[i]->get_time() < start->get_timer()) // if its time for the object to move
-					object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
-
-				if (object_tracking[i]->get_position() > 140 && object_tracking[i]->get_is_alive()) // if is at the space ship zone verifies collision
+				// text to start / quit game
 				{
-					object_tracking[i]->set_is_alive(false);
-					printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());
-					if (start->get_ship_location_transform() == object_tracking[i]->get_line()) // verifies if collision occur
-					{
-						printf("collision\n");
-						if (start->get_active_shape() == object_tracking[i]->get_shape_type()) // verifies if shape is the demanded
-						{
-							printf("correct shape\n");
-							start->process_shape(object_tracking[i]->get_shape_type()); // increment shape counter
-							PlaySound(TEXT("../../../assets/gonkas/collect.wav"), NULL, SND_FILENAME | SND_ASYNC);
-						}
-						else
-						{
-							printf("incorrect shape\n");
-							start->dec_lives(); // decrement live
-							PlaySound(TEXT("../../../assets/gonkas/collide.wav"), NULL, SND_FILENAME | SND_ASYNC);
-						}
+					if (app::is_key_down('S')) {
+						start->set_game_start(true);
+						PlaySound(NULL, 0, SND_ASYNC);
+					}
+					if (app::is_key_down('X')) {
+						exit(0);
 					}
 				}
-			}
 
-			if (start->get_lives() < 0)
-			{
-				text_center->clear();
-				text_center->format("GAME OVER!");
-				text_center->update();
-				overlay->render(vx, vy);
+				// display text
+				display_text(start, "Octet Shape Game\n[S]tart a Game\nE[x]it", vx, vy);	
 
-				PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
+			} // end of if starting game
 
-				getch(); // wait for a key get pressed
-				exit(0);
-			}
-	
 			// update matrices. assume 30 fps.
 			app_scene->update(1.0f / 30);
 
 			// draw the scene
 			app_scene->render((float)vx / vy);
 
-			// display text
-			text_left->clear();
-			text_right->clear();
-			text_center->clear();
-			text_left->format(
-				"active shape: %s\nobjects collected:\n\t\tCube     -> %d\n\t\tSphere   -> %d\n\t\tCylinder -> %d\n",
-				start->get_active_shape_text(), start->get_cubes(), start->get_spheres(), start->get_cylinders()
-				);
-			text_center->format("");
-			text_right->format("lives %d\n%s\n%d", start->get_lives(), start->get_sound(), start->get_ship_location_transform());
-			text_left->update();
-			text_center->update();
-			text_right->update(); // convert it to a mesh.
-			overlay->render(vx, vy); // draw the text overlay
 		}
-	};
 
+	};
 }

@@ -24,7 +24,7 @@ namespace octet {
 				this->line = line;
 				this->position = 0;
 				this->node = node;
-				this->speed = 0.02f;
+				this->speed = 0.5f;
 				this->time = time;
 				this->shape_type = shape_type;
 				this->is_alive = true;
@@ -46,7 +46,7 @@ namespace octet {
 				this->node = node;
 			}
 
-			void set_speed(int speed)
+			void set_speed(float speed)
 			{
 				this->speed = speed;
 			}
@@ -87,7 +87,7 @@ namespace octet {
 				return this->position;
 			}
 
-			int get_speed()
+			float get_speed()
 			{
 				return this->speed;
 			}
@@ -116,8 +116,7 @@ namespace octet {
 			void move(int node, ref<visual_scene> app_scene)
 			{
 				scene_node *move = app_scene->get_mesh_instance(node)->get_node();
-				//move->translate(vec3(0, 0, this->get_speed()));
-				move->translate(vec3(0, 0, 0.5f));
+				move->translate(vec3(0.0f, 0.0f, this->get_speed()));
 				inc_position();
 			}
 

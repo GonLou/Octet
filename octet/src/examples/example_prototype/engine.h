@@ -18,6 +18,7 @@ namespace octet {
 			int ship_location;
 			int timer;
 			int number_objects;
+			boolean game_start;
 
 			engine() // default constructor
 			{
@@ -30,6 +31,7 @@ namespace octet {
 				this->ship_location = 0;
 				this->timer = 0;
 				this->number_objects = 20;
+				this->game_start = false;
 			}
 
 			// set
@@ -81,6 +83,11 @@ namespace octet {
 			void set_number_objects(int number_objects)
 			{
 				this->number_objects = number_objects;
+			}
+
+			void set_game_start(bool game_start)
+			{
+				this->game_start = game_start;
 			}
 
 			// get
@@ -156,6 +163,11 @@ namespace octet {
 					return 3;
 				else
 					return 2;
+			}
+
+			boolean get_start_game()
+			{
+				return this->game_start;
 			}
 
 			// increment shapes
