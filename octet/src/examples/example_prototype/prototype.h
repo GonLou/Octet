@@ -8,6 +8,7 @@
 //				Goncalo Lourenco
 //
 // Octet Game Shape
+using namespace std;
 
 #include <vector>
 
@@ -25,8 +26,8 @@ namespace octet {
 		collada_builder loader;
 
 		// track of objects from game
-		ref<shape> object_tracking[20]; 
-		std::vector<shape> ot;
+		//ref<shape> object_tracking[20]; 
+		dynarray<ref<shape> > object_tracking;
 
 		// variables for the game
 		ref<engine> start;
@@ -36,6 +37,7 @@ namespace octet {
 
 		// text mesh object for overlay.
 		ref<mesh_text> text_left;
+		ref<mesh_text> text_center;
 		ref<mesh_text> text_right;
 
 		//construct a box
@@ -136,7 +138,6 @@ namespace octet {
 			mat4t modelToWorld;
 			int object_time;
 
-			//param_shader *shader = new param_shader("shaders/default.vs", "shaders/gonkas.fs");
 			// define the object color
 			vec4 o_color;
 			switch (color)
@@ -152,6 +153,7 @@ namespace octet {
 				o_color = (vec4(0, 0, 1, 1));
 				break;
 			}
+			//param_shader *shader = new param_shader("shaders/default.vs", "shaders/gonkas.fs");
 			material *m_color = new material(o_color);
 
 			// define the vertical line alignment position
@@ -186,8 +188,8 @@ namespace octet {
 
 			//modelToWorld.translate(a_line_negative[line-1], -2.0f, 1000.0f);
 			object_time = rand() % (start->get_number_objects() * 50) + 1;
-			//shape(int line, int position, int node, int object_time, int shape_type)
-			object_tracking[index] = new shape(line, (int)nodes.size(), object_time, 1);
+			shape *object_shape = new shape(line, (int)nodes.size(), object_time, shape_type);
+			object_tracking.push_back(object_shape);
 		}
 
 	public:
@@ -317,7 +319,8 @@ namespace octet {
 					start->set_sound_on();
 				}
 				if (app::is_key_down('N')) {			
-					PlaySound(NULL, NULL, 0);
+					PlaySound(NULL, 0, SND_ASYNC);
+					//NULL, 0, SND_ASYNC
 					start->set_sound_off();
 				}
 
@@ -358,6 +361,7 @@ namespace octet {
 			if (start->get_lives() < 0)
 			{
 				PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				Sleep(10000);
 				exit(0);
 			}
 	
