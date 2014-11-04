@@ -1,1 +1,36 @@
-soundName WAVE ../../../assets/gonkas/explosion.wav
+		void shake() {
+
+			float **p2DArray;
+			const int HEIGHT = 50;
+			const int WIDTH = 3;
+
+			p2DArray = new float*[HEIGHT];
+			for (int i = 0; i < HEIGHT; ++i)
+				p2DArray[i] = new float[WIDTH];
+
+			// assing the values
+			for (int i = 0; i < HEIGHT; i++)
+			{
+				p2DArray[i][0] = (rand() % 10 + 1) / 8;
+				p2DArray[i][1] = (rand() % 10 + 1) / 8;
+				p2DArray[i][2] = (rand() % 10 + 1) / 8;
+			}
+
+			// pass the values
+			for (int i = 0; i < HEIGHT; i++)
+			{
+				app_scene->get_camera_instance(0)->get_node()->translate(vec3(p2DArray[i][0], p2DArray[i][1], p2DArray[i][2]));
+				Sleep(10);
+			}
+			for (int i = 0; i < HEIGHT; i++)
+			{
+				app_scene->get_camera_instance(0)->get_node()->translate(vec3(p2DArray[i][0] * (1 - 2), p2DArray[i][1] * (1 - 2), p2DArray[i][2] * (1 - 2)));
+				Sleep(10);
+			}
+
+			// deallocate memory to prevent memory leak
+			for (int i = 0; i < HEIGHT; ++i)
+				delete[] p2DArray[i];
+			delete[] p2DArray;
+
+		}

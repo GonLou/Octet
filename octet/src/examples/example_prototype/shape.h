@@ -16,20 +16,11 @@ namespace octet {
 			int time;
 			int shape_type;
 			boolean is_alive;
+			int color;
 
-			shape() //default constructor starts at middle line
+			shape(int color, int line, int node, int time, int shape_type)
 			{
-				line = 1;
-				position = 0;
-				node = 0;
-				speed = 0.02f;
-				time = rand() % 110 + 1;
-				shape_type = 1;
-				is_alive = true;
-			}
-
-			shape(int line, int node, int time, int shape_type)
-			{
+				this->color = color;
 				this->line = line;
 				this->position = 0;
 				this->node = node;
@@ -75,6 +66,11 @@ namespace octet {
 				this->is_alive = is_alive;
 			}
 
+			void set_color(int color)
+			{
+				this->color = color;
+			}
+
 			// get
 			int get_line()
 			{
@@ -111,6 +107,11 @@ namespace octet {
 				return this->is_alive;
 			}
 
+			int get_color()
+			{
+				return this->color;
+			}
+
 			// move the shapes
 			void move(int node, ref<visual_scene> app_scene)
 			{
@@ -128,7 +129,12 @@ namespace octet {
 
 			void inc_speed()
 			{
-				this->speed = this->speed + 0.2f;
+				this->speed = this->speed + 0.1f;
+			}
+
+			// destructor
+			~shape(void)
+			{
 			}
 
 		};

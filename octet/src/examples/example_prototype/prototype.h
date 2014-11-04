@@ -95,51 +95,13 @@ namespace octet {
 
 		}
 
-		void shake() {
-
-			float **p2DArray;
-			const int HEIGHT = 50;
-			const int WIDTH = 3;
-
-			p2DArray = new float*[HEIGHT];
-			for (int i = 0; i < HEIGHT; ++i)
-				p2DArray[i] = new float[WIDTH];
-
-			// assing the values
-			for (int i = 0; i < HEIGHT; i++)
-			{
-				p2DArray[i][0] = (rand() % 10 + 1) / 8;
-				p2DArray[i][1] = (rand() % 10 + 1) / 8;
-				p2DArray[i][2] = (rand() % 10 + 1) / 8;
-			}
-
-			// pass the values
-			for (int i = 0; i < HEIGHT; i++)
-			{
-				app_scene->get_camera_instance(0)->get_node()->translate(vec3(p2DArray[i][0], p2DArray[i][1], p2DArray[i][2]));
-				Sleep(10);
-			}
-			for (int i = 0; i < HEIGHT; i++)
-			{
-				app_scene->get_camera_instance(0)->get_node()->translate(vec3(p2DArray[i][0] * (1 - 2), p2DArray[i][1] * (1 - 2), p2DArray[i][2] * (1 - 2)));
-				Sleep(10);
-			}
-
-			// deallocate memory to prevent memory leak
-			for (int i = 0; i < HEIGHT; ++i)
-				delete[] p2DArray[i];
-			delete[] p2DArray;
-
-		}
-
 		// create the random shapes with random colors and random vertical positions
-		void create_shape(int index, int color, int shape_type, int line)
+		void create_shape(int color, int shape_type, int object_time, int line)
 		{
 			mat4t modelToWorld;
-			int object_time;
+			vec4 o_color;
 
 			// define the object color
-			vec4 o_color;
 			switch (color)
 			{
 			case 1: // red color
@@ -149,7 +111,6 @@ namespace octet {
 				o_color = (vec4(0, 1, 0, 1));
 				break;
 			case 3: //blue color
-			default:
 				o_color = (vec4(0, 0, 1, 1));
 				break;
 			}
@@ -166,7 +127,6 @@ namespace octet {
 				modelToWorld.translate(0.0f, 2.0f, -50.0f);
 				break;
 			case 3: // right
-			default:
 				modelToWorld.translate(3.0f, 2.0f, -50.0f);
 				break;
 			}
@@ -181,14 +141,11 @@ namespace octet {
 				add_sphere(modelToWorld, vec3(3.0f, 3.0f, 3.0f), m_color, 1.4f);
 				break;
 			case 3: // cylinder
-			default:
 				add_cylinder(modelToWorld, vec3(0.3f, 0.3f, 0.3f), m_color);
 				break;
 			}
 
-			//modelToWorld.translate(a_line_negative[line-1], -2.0f, 1000.0f);
-			object_time = rand() % (start->get_number_objects() * 50) + 1;
-			shape *object_shape = new shape(line, (int)nodes.size(), object_time, shape_type);
+			shape *object_shape = new shape(color, line, (int)nodes.size()-1, object_time, shape_type);
 			object_tracking.push_back(object_shape);
 		}
 
@@ -246,26 +203,42 @@ namespace octet {
 			int color;
 			int shape_type;
 			int line;
+			int object_time;
 			srand(time(NULL)); // initialize random seed
 
 			for (int j = 0; j < start->get_number_objects(); j++)
 			{
-				color = rand() % 3 + 1;
-				shape_type = rand() % 3 + 1;
-				line = rand() % 3 + 1;
-				create_shape(j, color, shape_type, line);
-			}
+				color = (int) rand() % 3 + 1;
+				shape_type = (int) rand() % 3 + 1;
+				object_time = (int)rand() % (start->get_number_objects()*50) + 1;
+				line = (int) rand() % 3 + 1;
 
+				printf(" object_time= %d || color = %d || line = %d || shape_type = %d \n", object_time, color, line, shape_type);
+				create_shape(color, shape_type, object_time, line);
+				//create_shape(3, 3, object_time, 1);
+				
+				printf("id = %d  ||", j);
+				printf("color = %d  ||", object_tracking[j]->get_color());
+				printf("line = %d  ||", object_tracking[j]->get_line());
+				printf("  shape type =  %d\n", object_tracking[j]->get_shape_type());
+				//printf("  color =  %d\n", object_tracking[j]->get_color());
+				printf("\n");
+
+			}
+			
 			// text creation
 			overlay = new text_overlay(); // create the overlay
 			bitmap_font *font = overlay->get_default_font(); // get the default font.
 			// create a box containing text (in pixels)
 			aabb bb(vec3(100.0f, 100.0f, 0.0f), vec3(600, 150, 0));
 			text_left = new mesh_text(font, "", &bb);
+			aabb ab(vec3(300.0f, 100.0f, 0.0f), vec3(200, 50, 0));
+			text_center = new mesh_text(font, "Octet Shape Game\n\n\n [S]tart a Game\n\n[E]xit", &ab);
 			aabb aa(vec3(500.0f, 100.0f, 0.0f), vec3(100, 150, 0));
 			text_right = new mesh_text(font, "", &aa);
 			// add the mesh to the overlay.
 			overlay->add_mesh_text(text_left);
+			overlay->add_mesh_text(text_center);
 			overlay->add_mesh_text(text_right);
 
 		}
@@ -326,31 +299,42 @@ namespace octet {
 
 				// quit
 				if (app::is_key_down('Q')) {
+					/*text_center->clear();
+					text_center->format("You are about to quit the game [Y]es or [N]o?");
+					text_center->update();
+					overlay->render(vx, vy);*/
+
+					//getch(); // wait for a key get pressed
 					exit(0);
 				}
 
 			} // end keyboard <<<
 
-			for (int i = 0; i < (start->get_number_objects()-1); ++i) {
+			/*for (unsigned i = 0; i < (object_tracking.size()-1); ++i) 
+				printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());*/
+
+			for (unsigned i = 0; i < (object_tracking.size()); ++i) 
+			{
 
 				if (object_tracking[i]->get_time() < start->get_timer()) // if its time for the object to move
 					object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
 
-				if (object_tracking[i]->get_position() > 150 && object_tracking[i]->get_is_alive()) // if is at the space ship zone verifies collision
+				if (object_tracking[i]->get_position() > 140 && object_tracking[i]->get_is_alive()) // if is at the space ship zone verifies collision
 				{
 					object_tracking[i]->set_is_alive(false);
-					printf("line object: %d = %d \tship location: %d\n", i, object_tracking[i]->get_line(), start->get_ship_location_t());
-					if (start->collision(object_tracking[i]->get_line())) // verifies if collision occur
+					printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());
+					if (start->get_ship_location_transform() == object_tracking[i]->get_line()) // verifies if collision occur
 					{
-						/*printf("shape\n");
-						printf("ot line: %d\nship location: %d\n", object_tracking[i]->get_line(), start->get_ship_location());*/
-						if (start->good_object(object_tracking[i]->get_shape_type())) // verifies if shape is the demanded
+						printf("collision\n");
+						if (start->get_active_shape() == object_tracking[i]->get_shape_type()) // verifies if shape is the demanded
 						{
+							printf("correct shape\n");
 							start->process_shape(object_tracking[i]->get_shape_type()); // increment shape counter
 							PlaySound(TEXT("../../../assets/gonkas/collect.wav"), NULL, SND_FILENAME | SND_ASYNC);
 						}
 						else
 						{
+							printf("incorrect shape\n");
 							start->dec_lives(); // decrement live
 							PlaySound(TEXT("../../../assets/gonkas/collide.wav"), NULL, SND_FILENAME | SND_ASYNC);
 						}
@@ -360,8 +344,14 @@ namespace octet {
 
 			if (start->get_lives() < 0)
 			{
+				text_center->clear();
+				text_center->format("GAME OVER!");
+				text_center->update();
+				overlay->render(vx, vy);
+
 				PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
-				Sleep(10000);
+
+				getch(); // wait for a key get pressed
 				exit(0);
 			}
 	
@@ -374,13 +364,15 @@ namespace octet {
 			// display text
 			text_left->clear();
 			text_right->clear();
+			text_center->clear();
 			text_left->format(
 				"active shape: %s\nobjects collected:\n\t\tCube     -> %d\n\t\tSphere   -> %d\n\t\tCylinder -> %d\n",
 				start->get_active_shape_text(), start->get_cubes(), start->get_spheres(), start->get_cylinders()
 				);
-			text_right->format("lives %d\n%s\n%d", start->get_lives(), start->get_sound(), start->get_ship_location_t());
-			//text_right->format("lives %d\n%s\n%d", start->get_lives(), start->get_sound(), object_tracking[0]->get_position());
+			text_center->format("");
+			text_right->format("lives %d\n%s\n%d", start->get_lives(), start->get_sound(), start->get_ship_location_transform());
 			text_left->update();
+			text_center->update();
 			text_right->update(); // convert it to a mesh.
 			overlay->render(vx, vy); // draw the text overlay
 		}

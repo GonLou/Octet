@@ -148,6 +148,16 @@ namespace octet {
 				return this->number_objects;
 			}
 
+			int get_ship_location_transform()
+			{
+				if (this->get_ship_location() <= -4)
+					return  1;
+				else if (this->get_ship_location() >= 4)
+					return 3;
+				else
+					return 2;
+			}
+
 			// increment shapes
 			void inc_cubes()
 			{
@@ -183,45 +193,6 @@ namespace octet {
 			void dec_ship_location()
 			{
 				this->ship_location = this->ship_location - 1;
-			}
-
-			// check collisions
-			boolean collision(int o_line)
-			{
-				int s_pos;
-
-				if (get_ship_location() <= -4)
-					s_pos = 1;
-				else if(get_ship_location() >= 4)
-					s_pos = 3;
-				else
-					s_pos = 2;
-
-				if (o_line == s_pos)
-					return true;
-				else
-					return false;
-			}
-
-			int get_ship_location_t()
-			{
-
-				if (get_ship_location() <= -4)
-					return  1;
-				else if (get_ship_location() >= 4)
-					return 3;
-				else
-					return 2;
-
-			}
-
-			// check if the object is the one that is highlighted
-			boolean good_object(int o_shape)
-			{
-				if (get_active_shape() == o_shape)
-					return true;
-				else
-					return false;
 			}
 
 			// increment the shapes value if catch the correct shape
