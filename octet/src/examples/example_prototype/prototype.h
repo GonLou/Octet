@@ -333,31 +333,44 @@ namespace octet {
 
 				for (unsigned i = 0; i < (object_tracking.size()); ++i)
 				{
-
 					if (object_tracking[i]->get_time() < start->get_timer()) // if its time for the object to move
 					{
 						object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
 						if (i == object_tracking.size() || i == (int)(object_tracking.size() / 2))
 						{
-							start->set_active_shape(object_tracking[i]->get_shape_type());
+							if (object_tracking[i]->get_time() < start->get_timer() + 2 && object_tracking[i]->get_time() > start->get_timer() - 2)
+							{
+								start->set_active_shape(object_tracking[i]->get_shape_type());
+								PlaySound(TEXT("../../../assets/gonkas/objective.wav"), NULL, SND_FILENAME | SND_ASYNC);
+							}
 						}
 					}
 
 					if (object_tracking[i]->get_position() > 140 && object_tracking[i]->get_is_alive()) // if is at the space ship zone verifies collision
 					{
-						object_tracking[i]->set_is_alive(false);
-						start->set_number_objects(start->get_number_objects()-1);
 						if (start->get_ship_location_transform() == object_tracking[i]->get_line()) // verifies if collision occur
 						{
 							if (start->get_active_shape() == object_tracking[i]->get_shape_type()) // verifies if shape is the demanded
 							{
 								start->process_shape(object_tracking[i]->get_shape_type()); // increment shape counter
 								PlaySound(TEXT("../../../assets/gonkas/collect.wav"), NULL, SND_FILENAME | SND_ASYNC);
+								object_tracking[i]->set_is_alive(false);
+								start->set_number_objects(start->get_number_objects() - 1);
 							}
 							else
 							{
 								start->dec_lives(); // decrement live
 								PlaySound(TEXT("../../../assets/gonkas/collide.wav"), NULL, SND_FILENAME | SND_ASYNC);
+								object_tracking[i]->set_is_alive(false);
+								start->set_number_objects(start->get_number_objects() - 1);
+							}
+						}
+						else
+						{	
+							if (object_tracking[i]->get_position() > 160)
+							{
+								object_tracking[i]->set_is_alive(false);
+								start->set_number_objects(start->get_number_objects() - 1);
 							}
 						}
 					}
