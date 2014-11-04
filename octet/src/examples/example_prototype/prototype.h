@@ -219,6 +219,9 @@ namespace octet {
 				line = (int) rand() % 3 + 1;
 				create_shape(color, shape_type, object_time, line);
 			}
+			
+			// change the active shape
+			start->set_active_shape(object_tracking[0]->get_shape_type());
 
 			/*for (unsigned i = 0; i < (object_tracking.size()-1); ++i)
 			printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());*/
@@ -255,7 +258,7 @@ namespace octet {
 				start->get_active_shape_text(), start->get_cubes(), start->get_spheres(), start->get_cylinders()
 				);
 			text_center->format("%s", mid_text);
-			text_right->format("lives %d\n%s\n", start->get_lives(), start->get_sound());
+			text_right->format("lives %d\n%s\n%d shapes", start->get_lives(), start->get_sound(), start->get_number_objects());
 			// convert it to a mesh.
 			text_left->update();
 			text_center->update();
@@ -334,12 +337,16 @@ namespace octet {
 					if (object_tracking[i]->get_time() < start->get_timer()) // if its time for the object to move
 					{
 						object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
-						printf("speed %f\n", object_tracking[i]->get_speed());
+						if (i == object_tracking.size() || i == (int)(object_tracking.size() / 2))
+						{
+							start->set_active_shape(object_tracking[i]->get_shape_type());
+						}
 					}
 
 					if (object_tracking[i]->get_position() > 140 && object_tracking[i]->get_is_alive()) // if is at the space ship zone verifies collision
 					{
 						object_tracking[i]->set_is_alive(false);
+						start->set_number_objects(start->get_number_objects()-1);
 						if (start->get_ship_location_transform() == object_tracking[i]->get_line()) // verifies if collision occur
 						{
 							if (start->get_active_shape() == object_tracking[i]->get_shape_type()) // verifies if shape is the demanded
