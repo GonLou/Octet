@@ -216,7 +216,7 @@ namespace octet {
 			{
 				color = (int) rand() % 3 + 1;
 				shape_type = (int) rand() % 3 + 1;
-				object_time = (int)rand() % (start->get_number_objects()*50) + 1;
+				object_time = (int)rand() % (start->get_number_objects() * 50) + 1;
 				line = (int) rand() % 3 + 1;
 				create_shape(color, shape_type, object_time, line);
 			}
@@ -243,7 +243,7 @@ namespace octet {
 			overlay->add_mesh_text(text_right);
 
 			// play the background music
-			PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
+			//PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
 
 		}
 
@@ -259,7 +259,8 @@ namespace octet {
 				start->get_active_shape_text(), start->get_cubes(), start->get_spheres(), start->get_cylinders()
 				);
 			text_center->format("%s", mid_text);
-			text_right->format("lives %d\n%s\n%d shapes", start->get_lives(), start->get_sound(), start->get_number_objects());
+			text_right->format("lives %d\n%s\n%d shapes\n%d points", 
+				                start->get_lives(), start->get_sound(), start->get_number_objects(), start->get_points());
 			// convert it to a mesh.
 			text_left->update();
 			text_center->update();
@@ -277,8 +278,6 @@ namespace octet {
 			if (start->get_start_game())
 			{
 				start->inc_timer();
-
-				printf("timer %d", start->get_timer());
 
 				{  	// >>> begin keyboard
 
@@ -361,6 +360,7 @@ namespace octet {
 								object_tracking[i]->fade(object_tracking[i]->get_node(), app_scene);
 								object_tracking[i]->set_is_alive(false);
 								start->set_number_objects(start->get_number_objects() - 1);
+								start->set_points(((start->get_lives()+1)*10 + 100)+start->get_points());
 							}
 							else
 							{

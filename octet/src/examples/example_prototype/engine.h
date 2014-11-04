@@ -19,6 +19,7 @@ namespace octet {
 			int timer;
 			int number_objects;
 			boolean game_start;
+			int points;
 
 			engine() // default constructor
 			{
@@ -32,6 +33,7 @@ namespace octet {
 				this->timer = 0;
 				this->number_objects = 20;
 				this->game_start = false;
+				this->points = 0;
 			}
 
 			// set
@@ -88,6 +90,11 @@ namespace octet {
 			void set_game_start(bool game_start)
 			{
 				this->game_start = game_start;
+			}
+
+			void set_points(int points)
+			{
+				this->points = points;
 			}
 
 			// get
@@ -168,6 +175,11 @@ namespace octet {
 			boolean get_start_game()
 			{
 				return this->game_start;
+			}
+
+			int get_points()
+			{
+				return this->points;
 			}
 
 			// increment shapes
