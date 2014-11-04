@@ -120,6 +120,15 @@ namespace octet {
 				inc_position();
 			}
 
+			void fade(int node, ref<visual_scene> app_scene)
+			{
+				scene_node *move = app_scene->get_mesh_instance(node)->get_node();
+				this->set_speed(5);
+				move->translate(vec3(0.0f, 0.0f, this->get_speed()));
+				move->scale(vec3(this->get_speed() / 50, this->get_speed() / 50, this->get_speed() / 50));
+				inc_position();
+			}
+
 			// increment position
 			void inc_position()
 			{

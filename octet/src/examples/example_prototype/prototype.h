@@ -117,7 +117,8 @@ namespace octet {
 				o_color = (vec4(0, 0, 1, 1));
 				break;
 			}
-			//param_shader *shader = new param_shader("shaders/default.vs", "shaders/gonkas.fs");
+			/*image *material_image = new image("assets/gonkas/material_texture.jpg");
+			material *m_color = new material(material_image);*/
 			material *m_color = new material(o_color);
 
 			// define the vertical line alignment position
@@ -242,7 +243,7 @@ namespace octet {
 			overlay->add_mesh_text(text_right);
 
 			// play the background music
-			//PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
+			PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
 
 		}
 
@@ -276,6 +277,8 @@ namespace octet {
 			if (start->get_start_game())
 			{
 				start->inc_timer();
+
+				printf("timer %d", start->get_timer());
 
 				{  	// >>> begin keyboard
 
@@ -338,7 +341,8 @@ namespace octet {
 						object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
 						if (i == object_tracking.size() || i == (int)(object_tracking.size() / 2))
 						{
-							if (object_tracking[i]->get_time() < start->get_timer() + 2 && object_tracking[i]->get_time() > start->get_timer() - 2)
+							if (   object_tracking[i]->get_time() < start->get_timer() + 2
+								&& object_tracking[i]->get_time() > start->get_timer() - 2)
 							{
 								start->set_active_shape(object_tracking[i]->get_shape_type());
 								PlaySound(TEXT("../../../assets/gonkas/objective.wav"), NULL, SND_FILENAME | SND_ASYNC);
@@ -354,6 +358,7 @@ namespace octet {
 							{
 								start->process_shape(object_tracking[i]->get_shape_type()); // increment shape counter
 								PlaySound(TEXT("../../../assets/gonkas/collect.wav"), NULL, SND_FILENAME | SND_ASYNC);
+								object_tracking[i]->fade(object_tracking[i]->get_node(), app_scene);
 								object_tracking[i]->set_is_alive(false);
 								start->set_number_objects(start->get_number_objects() - 1);
 							}
@@ -365,7 +370,7 @@ namespace octet {
 								start->set_number_objects(start->get_number_objects() - 1);
 							}
 						}
-						else
+						else // if not collsion
 						{	
 							if (object_tracking[i]->get_position() > 160)
 							{
@@ -376,11 +381,17 @@ namespace octet {
 					}
 				}
 
+				if ((object_tracking.size() * 50 + 150) < (start->get_timer()))
+				{
+					printf("FIM DO JOGO!");
+				}
+
 				if (start->get_lives() < 0)
 				{
 					PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
 					//getch(); // wait for a key get pressed
+					Sleep(5000);
 					exit(0);
 				}
 
