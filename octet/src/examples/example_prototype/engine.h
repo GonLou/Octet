@@ -54,12 +54,8 @@ namespace octet {
 				this->lives = lives;
 			}
 
-			void set_sound_on() {
-				this->sound = true;
-			}
-
-			void set_sound_off() {
-				this->sound = false;
+			void set_sound(bool sound) {
+				this->sound = sound;
 			}
 
 			void set_ship_location(int ship_location) {
@@ -125,7 +121,11 @@ namespace octet {
 				return this->lives;
 			}
 
-			string get_sound() {
+			boolean get_sound() {
+				return this->sound;
+			}
+
+			string get_sound_text() {
 				if (sound)
 					return "sound on [N]";
 				else

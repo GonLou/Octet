@@ -166,7 +166,7 @@ namespace octet {
 
 			start->set_number_objects(TOTAL_OBJECTS);
 
-			start->set_sound_on();
+			start->set_sound(true);
 
 			mat4t modelToWorld;
 
@@ -255,7 +255,7 @@ namespace octet {
 				);
 			text_center->format("%s", mid_text);
 			text_right->format("lives %d\n%s\n%d shapes\n%d points", 
-				                start->get_lives(), start->get_sound(), start->get_number_objects(), start->get_points());
+				                start->get_lives(), start->get_sound_text(), start->get_number_objects(), start->get_points());
 			// convert it to a mesh.
 			text_left->update();
 			text_center->update();
@@ -268,6 +268,8 @@ namespace octet {
 			int vx = 0, vy = 0;
 			get_viewport_size(vx, vy);
 			app_scene->begin_render(vx, vy);
+
+			//printf("som %s\n",start->get_sound());
 
 			if (start->get_start_game()) {
 				start->inc_timer();
@@ -319,11 +321,11 @@ namespace octet {
 
 					// toggle sound
 					if (app::is_key_down('M')) {
-						start->set_sound_on();
+						start->set_sound(true);
 					}
 					if (app::is_key_down('N')) {			
 						PlaySound(NULL, 0, SND_ASYNC);
-						start->set_sound_off();
+						start->set_sound(false);
 					}
 
 					// quit
@@ -379,26 +381,24 @@ namespace octet {
 
 				if ((object_tracking.size() * 50 + 150) < (start->get_timer())) {
 					// display text
-					display_text(start, "Congratulations!\n You achieved\n 0 points", vx, vy);
+					//display_text(start, "Congratulations!\n You achieved\n 0 points", vx, vy);
 
-					// update matrices. assume 30 fps.
-					app_scene->update(1.0f / 30);
-
-					// draw the scene
-					app_scene->render((float)vx / vy);
+					text_center->clear();
+					text_center->format("Congratulations!\n You achieved\n 0 points");
+					text_center->update();
+					overlay->render(vx, vy); // draw the text overlay
 
 					Sleep(5000);
 					exit(0);
 				}
 
 				if (start->get_lives() < 0) {
-					display_text(start, "GAME OVER!\n You lost\nYou achieved\n 0 points", vx, vy);
+					//display_text(start, "GAME OVER!\n You lost\nYou achieved\n 0 points", vx, vy);
 
-					// update matrices. assume 30 fps.
-					app_scene->update(1.0f / 30);
-
-					// draw the scene
-					app_scene->render((float)vx / vy);
+					text_center->clear();
+					text_center->format("GAME OVER!\n You lost\nYou achieved\n 0 pointss");
+					text_center->update();
+					overlay->render(vx, vy); // draw the text overlay
 
 					if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
