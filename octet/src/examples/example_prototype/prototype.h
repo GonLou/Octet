@@ -105,8 +105,7 @@ namespace octet {
 			vec4 o_color;
 
 			// define the object color
-			switch (color)
-			{
+			switch (color) {
 			case 1: // red color
 				o_color = (vec4(1, 0, 0, 1));
 				break;
@@ -122,8 +121,7 @@ namespace octet {
 			material *m_color = new material(o_color);
 
 			// define the vertical line alignment position
-			switch (line)
-			{
+			switch (line) {
 			case 1: // left
 				modelToWorld.translate(-3.0f, 2.0f, -50.0f);
 				break;
@@ -136,8 +134,7 @@ namespace octet {
 			}
 
 			// define the object shape type
-			switch (shape_type)
-			{
+			switch (shape_type) {
 			case 1: // cube
 				add_box(modelToWorld, vec3(0.7f, 0.7f, 0.7f), m_color);
 				break;
@@ -212,8 +209,7 @@ namespace octet {
 			int object_time;
 			srand(time(NULL)); // initialize random seed
 
-			for (int j = 0; j < start->get_number_objects(); j++)
-			{
+			for (int j = 0; j < start->get_number_objects(); j++) {
 				color = (int) rand() % 3 + 1;
 				shape_type = (int) rand() % 3 + 1;
 				object_time = (int)rand() % (start->get_number_objects() * 50) + 1;
@@ -247,8 +243,7 @@ namespace octet {
 
 		}
 
-		void display_text(ref<engine> start, string mid_text, int vx, int vy)
-		{
+		void display_text(ref<engine> start, string mid_text, int vx, int vy) {
 			// clear the text
 			text_left->clear();
 			text_center->clear();
@@ -269,22 +264,19 @@ namespace octet {
 		}
 
 		/// this is called to draw the world
-		void draw_world(int x, int y, int w, int h) 
-		{
+		void draw_world(int x, int y, int w, int h) {
 			int vx = 0, vy = 0;
 			get_viewport_size(vx, vy);
 			app_scene->begin_render(vx, vy);
 
-			if (start->get_start_game())
-			{
+			if (start->get_start_game()) {
 				start->inc_timer();
 
 				{  	// >>> begin keyboard
 
 					//ship controls
 					scene_node *ship_controller = app_scene->get_mesh_instance(6)->get_node();
-					if (start->get_ship_location() >= -12 && start->get_ship_location() <= 12)
-					{
+					if (start->get_ship_location() >= -12 && start->get_ship_location() <= 12) {
 						if (app::is_key_down(key_left) || app::is_key_going_up(key_left)) {
 							start->dec_ship_location();
 							ship_controller->translate(vec3(0, -0.3f, 0));
@@ -344,47 +336,40 @@ namespace octet {
 				/*for (unsigned i = 0; i < (object_tracking.size()-1); ++i) 
 					printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());*/
 
-				for (unsigned i = 0; i < (object_tracking.size()); ++i)
-				{
-					if (object_tracking[i]->get_time() < start->get_timer()) // if its time for the object to move
-					{
+				for (unsigned i = 0; i < (object_tracking.size()); ++i) {
+					if (object_tracking[i]->get_time() < start->get_timer()) { // if its time for the object to move
 						object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
-						if (i == object_tracking.size() || i == (int)(object_tracking.size() / 2))
-						{
+						if (i == object_tracking.size() || 
+							i == (int)(object_tracking.size() / 2) || 
+							i == (int)(object_tracking.size() / 3)) {
 							if (   object_tracking[i]->get_time() < start->get_timer() + 2
-								&& object_tracking[i]->get_time() > start->get_timer() - 2)
-							{
+								&& object_tracking[i]->get_time() > start->get_timer() - 2) {
 								start->set_active_shape(object_tracking[i]->get_shape_type());
-								PlaySound(TEXT("../../../assets/gonkas/objective.wav"), NULL, SND_FILENAME | SND_ASYNC);
+								if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/objective.wav"), NULL, SND_FILENAME | SND_ASYNC);
 							}
 						}
 					}
 
-					if (object_tracking[i]->get_position() > 140 && object_tracking[i]->get_is_alive()) // if is at the space ship zone verifies collision
-					{
-						if (start->get_ship_location_transform() == object_tracking[i]->get_line()) // verifies if collision occur
-						{
-							if (start->get_active_shape() == object_tracking[i]->get_shape_type()) // verifies if shape is the demanded
-							{
+					if (object_tracking[i]->get_position() > 140 && 
+						object_tracking[i]->get_is_alive()) { // if is at the space ship zone verifies collision
+						if (start->get_ship_location_transform() == object_tracking[i]->get_line()) { // verifies if collision occur
+							if (start->get_active_shape() == object_tracking[i]->get_shape_type()) { // verifies if shape is the demanded
 								start->process_shape(object_tracking[i]->get_shape_type()); // increment shape counter
-								PlaySound(TEXT("../../../assets/gonkas/collect.wav"), NULL, SND_FILENAME | SND_ASYNC);
+								if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/collect.wav"), NULL, SND_FILENAME | SND_ASYNC);
 								object_tracking[i]->fade(object_tracking[i]->get_node(), app_scene);
 								object_tracking[i]->set_is_alive(false);
 								start->set_number_objects(start->get_number_objects() - 1);
 								start->set_points(((start->get_lives())*2 * 10)+start->get_points());
 							}
-							else
-							{
+							else {
 								start->dec_lives(); // decrement live
-								PlaySound(TEXT("../../../assets/gonkas/collide.wav"), NULL, SND_FILENAME | SND_ASYNC);
+								if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/collide.wav"), NULL, SND_FILENAME | SND_ASYNC);
 								object_tracking[i]->set_is_alive(false);
 								start->set_number_objects(start->get_number_objects() - 1);
 							}
 						}
-						else // if not collsion
-						{	
-							if (object_tracking[i]->get_position() > 160)
-							{
+						else { // if not collsion
+							if (object_tracking[i]->get_position() > 160) {
 								object_tracking[i]->set_is_alive(false);
 								start->set_number_objects(start->get_number_objects() - 1);
 							}
@@ -392,14 +377,30 @@ namespace octet {
 					}
 				}
 
-				if ((object_tracking.size() * 50 + 150) < (start->get_timer()))
-				{
-					printf("FIM DO JOGO!");
+				if ((object_tracking.size() * 50 + 150) < (start->get_timer())) {
+					// display text
+					display_text(start, "Congratulations!\n You achieved\n 0 points", vx, vy);
+
+					// update matrices. assume 30 fps.
+					app_scene->update(1.0f / 30);
+
+					// draw the scene
+					app_scene->render((float)vx / vy);
+
+					Sleep(5000);
+					exit(0);
 				}
 
-				if (start->get_lives() < 0)
-				{
-					PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				if (start->get_lives() < 0) {
+					display_text(start, "GAME OVER!\n You lost\nYou achieved\n 0 points", vx, vy);
+
+					// update matrices. assume 30 fps.
+					app_scene->update(1.0f / 30);
+
+					// draw the scene
+					app_scene->render((float)vx / vy);
+
+					if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
 					//getch(); // wait for a key get pressed
 					Sleep(5000);
@@ -410,8 +411,7 @@ namespace octet {
 				display_text(start, "", vx, vy);
 
 			}
-			else // if game not started
-			{
+			else { // if game not started
 				// text to start / quit game
 				{
 					if (app::is_key_down('S')) {
