@@ -193,6 +193,16 @@ namespace octet {
 			add_box(modelToWorld, vec3(5.0f, 0.5f, 50.0f), world_ground_material);
 			modelToWorld.translate(28.60f, -0.05f, 0);
 			add_box(modelToWorld, vec3(5.0f, 0.5f, 50.0f), world_ground_material);
+			
+			// placard
+			modelToWorld.translate(-14.30f, 5.0f, 0);
+			image *game_over_image = new image("assets/gonkas/game_over.jpg");
+			material *m_img01 = new material(game_over_image);
+			add_box(modelToWorld, vec3(10.7f, 3.7f, 0.0f), m_img01);
+			image *end_game_image = new image("assets/gonkas/end_game.jpg");
+			material *m_img02 = new material(game_over_image);
+			add_box(modelToWorld, vec3(10.7f, 3.7f, 0.0f), m_img02);
+			modelToWorld.translate(14.30f, -5.0f, 0);
 
 			// add spaceship
 			material *spaceship_material = new material(new image("assets/gonkas/spaceship_texture.jpg"), NULL); 
@@ -200,7 +210,9 @@ namespace octet {
 			modelToWorld.rotateY(90);
 			modelToWorld.rotateX(90);
 			modelToWorld.translate(-20.0f, -14.0f, 1.8f);
+			//modelToWorld.translate(-6.0f, -9.0f, 1.8f);
 			add_collada(modelToWorld, vec3(1.0f, 1.0f, 1.0f), spaceship_material, "assets/gonkas/spaceship.dae");
+			start->set_node_spaceship((int)nodes.size() - 1);
 
 			// random objects creation
 			int color;
@@ -241,6 +253,11 @@ namespace octet {
 			// play the background music
 			//PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
 
+			scene_node *placard_end_game = app_scene->get_mesh_instance(start->get_node_spaceship()-1)->get_node();
+			placard_end_game->translate(vec3(0, 0, -30));
+			scene_node *placard_game_over = app_scene->get_mesh_instance(start->get_node_spaceship() - 2)->get_node();
+			placard_game_over->translate(vec3(0, 0, -30));
+
 		}
 
 		void display_text(ref<engine> start, string mid_text, int vx, int vy) {
@@ -269,15 +286,13 @@ namespace octet {
 			get_viewport_size(vx, vy);
 			app_scene->begin_render(vx, vy);
 
-			//printf("som %s\n",start->get_sound());
-
 			if (start->get_start_game()) {
 				start->inc_timer();
 
 				{  	// >>> begin keyboard
 
 					//ship controls
-					scene_node *ship_controller = app_scene->get_mesh_instance(6)->get_node();
+					scene_node *ship_controller = app_scene->get_mesh_instance(start->get_node_spaceship())->get_node();
 					if (start->get_ship_location() >= -12 && start->get_ship_location() <= 12) {
 						if (app::is_key_down(key_left) || app::is_key_going_up(key_left)) {
 							start->dec_ship_location();
@@ -379,30 +394,30 @@ namespace octet {
 					}
 				}
 
-				if ((object_tracking.size() * 50 + 150) < (start->get_timer())) {
-					// display text
-					//display_text(start, "Congratulations!\n You achieved\n 0 points", vx, vy);
-
-					text_center->clear();
-					text_center->format("Congratulations!\n You achieved\n 0 points");
-					text_center->update();
-					overlay->render(vx, vy); // draw the text overlay
+				if ((object_tracking.size() * 50 + 150) < (start->get_timer())) { // the game ended with sucess
+					scene_node *placard_end_game = app_scene->get_mesh_instance(start->get_node_spaceship() - 1)->get_node();
+					for (int i = 0; i < 30; i++)
+						placard_end_game->translate(vec3(0, 0, 1));
 
 					Sleep(5000);
 					exit(0);
 				}
 
-				if (start->get_lives() < 0) {
-					//display_text(start, "GAME OVER!\n You lost\nYou achieved\n 0 points", vx, vy);
+				if (start->get_lives() < 0) { // game over
+					scene_node *placard_game_over = app_scene->get_mesh_instance(start->get_node_spaceship() - 2)->get_node();
+					for (int i = 0; i < 30; i++) {
+						placard_game_over->translate(vec3(0, 0, 30));
 
-					text_center->clear();
-					text_center->format("GAME OVER!\n You lost\nYou achieved\n 0 pointss");
-					text_center->update();
-					overlay->render(vx, vy); // draw the text overlay
+						// update matrices. assume 30 fps.
+						app_scene->update(1.0f / 30);
+
+						// draw the scene
+						app_scene->render((float)vx / vy);
+
+					}
 
 					if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
-					//getch(); // wait for a key get pressed
 					Sleep(5000);
 					exit(0);
 				}

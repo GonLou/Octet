@@ -21,6 +21,7 @@ namespace octet {
 			boolean game_start;
 			int points;
 			int camera_orientation;
+			int node_spaceship;
 
 			engine() { // default constructor
 				this->count_cubes = 0;
@@ -35,6 +36,7 @@ namespace octet {
 				this->game_start = false;
 				this->points = 0;
 				this->camera_orientation = 0;
+				this->node_spaceship = 0;
 			}
 
 			// set
@@ -84,6 +86,10 @@ namespace octet {
 
 			void set_camera_orientation(int camera_orientation) {
 				this->camera_orientation = camera_orientation;
+			}
+
+			void set_node_spaceship(int node_spaceship) {
+				this->node_spaceship = node_spaceship;
 			}
 
 			// get
@@ -163,6 +169,10 @@ namespace octet {
 
 			int get_camera_orientation() {
 				return this->camera_orientation;
+			}
+
+			int get_node_spaceship() {
+				return this->node_spaceship;
 			}
 
 			// increment shapes
