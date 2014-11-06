@@ -29,6 +29,10 @@ namespace octet {
 				this->is_alive = true;
 			}
 
+			// destructor
+			~shape(void) {
+			}
+
 			// set
 			void set_line(int line) {
 				this->line = line;
@@ -117,10 +121,6 @@ namespace octet {
 
 			void inc_speed() {
 				this->speed = this->speed + 0.1f;
-			}
-
-			// destructor
-			~shape(void) {
 			}
 
 		};

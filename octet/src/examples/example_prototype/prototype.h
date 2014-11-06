@@ -200,7 +200,7 @@ namespace octet {
 			material *m_img01 = new material(game_over_image);
 			add_box(modelToWorld, vec3(10.7f, 3.7f, 0.0f), m_img01);
 			image *end_game_image = new image("assets/gonkas/end_game.jpg");
-			material *m_img02 = new material(game_over_image);
+			material *m_img02 = new material(end_game_image);
 			add_box(modelToWorld, vec3(10.7f, 3.7f, 0.0f), m_img02);
 			modelToWorld.translate(14.30f, -5.0f, 0);
 
@@ -251,12 +251,12 @@ namespace octet {
 			overlay->add_mesh_text(text_right);
 
 			// play the background music
-			//PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
+			PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
 
 			scene_node *placard_end_game = app_scene->get_mesh_instance(start->get_node_spaceship()-1)->get_node();
-			placard_end_game->translate(vec3(0, 0, -30));
+			placard_end_game->translate(vec3(0, 0, start->get_end_game_counter()*(1-2)));
 			scene_node *placard_game_over = app_scene->get_mesh_instance(start->get_node_spaceship() - 2)->get_node();
-			placard_game_over->translate(vec3(0, 0, -30));
+			placard_game_over->translate(vec3(0, 0, start->get_end_game_counter()*(1 - 2)));
 
 		}
 
@@ -286,7 +286,7 @@ namespace octet {
 			get_viewport_size(vx, vy);
 			app_scene->begin_render(vx, vy);
 
-			if (start->get_start_game()) {
+			if (start->get_game_start()) {
 				start->inc_timer();
 
 				{  	// >>> begin keyboard
@@ -395,31 +395,11 @@ namespace octet {
 				}
 
 				if ((object_tracking.size() * 50 + 150) < (start->get_timer())) { // the game ended with sucess
-					scene_node *placard_end_game = app_scene->get_mesh_instance(start->get_node_spaceship() - 1)->get_node();
-					for (int i = 0; i < 30; i++)
-						placard_end_game->translate(vec3(0, 0, 1));
-
-					Sleep(5000);
-					exit(0);
+					start->set_game_start(false);
 				}
 
 				if (start->get_lives() < 0) { // game over
-					scene_node *placard_game_over = app_scene->get_mesh_instance(start->get_node_spaceship() - 2)->get_node();
-					for (int i = 0; i < 30; i++) {
-						placard_game_over->translate(vec3(0, 0, 30));
-
-						// update matrices. assume 30 fps.
-						app_scene->update(1.0f / 30);
-
-						// draw the scene
-						app_scene->render((float)vx / vy);
-
-					}
-
-					if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
-
-					Sleep(5000);
-					exit(0);
+					start->set_game_start(false);
 				}
 
 				// display text
@@ -427,19 +407,42 @@ namespace octet {
 
 			}
 			else { // if game not started
-				// text to start / quit game
-				{
-					if (app::is_key_down('S')) {
-						start->set_game_start(true);
-						PlaySound(NULL, 0, SND_ASYNC);
-					}
-					if (app::is_key_down('X')) {
+
+				if ((object_tracking.size() * 50 + 150) < (start->get_timer())) { // the game ended with sucess
+					scene_node *placard_end_game = app_scene->get_mesh_instance(start->get_node_spaceship() - 1)->get_node();
+					placard_end_game->translate(vec3(0, 0, 1));
+					start->set_end_game_counter(start->get_end_game_counter() - 1);
+
+					if (start->get_end_game_counter() <= 0) {
+						Sleep(5000);
 						exit(0);
 					}
 				}
+				else if (start->get_lives() < 0) { // game over
+					scene_node *placard_game_over = app_scene->get_mesh_instance(start->get_node_spaceship() - 2)->get_node();
+					placard_game_over->translate(vec3(0, 0, 1));
+					start->set_end_game_counter(start->get_end_game_counter() - 1);
+
+					if (start->get_end_game_counter() <= 0) {
+						if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
+						Sleep(5000);
+						exit(0);
+					}
+				}
+				else { 	
+					{ // keys to start / quit game
+						if (app::is_key_down('S')) {
+							start->set_game_start(true);
+							PlaySound(NULL, 0, SND_ASYNC);
+						}
+						if (app::is_key_down('X')) {
+							exit(0);
+						}
+					}
 
 				// display text
-				display_text(start, "Octet Shape Game\n[S]tart a Game\nE[x]it", vx, vy);	
+				display_text(start, "Octet Shape Game\n[S]tart a Game\nE[x]it", vx, vy);
+				}
 
 			} // end of if starting game
 

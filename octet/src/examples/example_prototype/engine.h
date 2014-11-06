@@ -22,6 +22,7 @@ namespace octet {
 			int points;
 			int camera_orientation;
 			int node_spaceship;
+			int end_game_counter;
 
 			engine() { // default constructor
 				this->count_cubes = 0;
@@ -37,6 +38,11 @@ namespace octet {
 				this->points = 0;
 				this->camera_orientation = 0;
 				this->node_spaceship = 0;
+				this->end_game_counter = 100;
+			}
+
+			// destructor
+			~engine(void) {
 			}
 
 			// set
@@ -90,6 +96,10 @@ namespace octet {
 
 			void set_node_spaceship(int node_spaceship) {
 				this->node_spaceship = node_spaceship;
+			}
+
+			void set_end_game_counter(int end_game_counter) {
+				this->end_game_counter = end_game_counter;
 			}
 
 			// get
@@ -159,7 +169,7 @@ namespace octet {
 					return 2;
 			}
 
-			boolean get_start_game() {
+			boolean get_game_start() {
 				return this->game_start;
 			}
 
@@ -173,6 +183,10 @@ namespace octet {
 
 			int get_node_spaceship() {
 				return this->node_spaceship;
+			}
+
+			int get_end_game_counter() {
+				return this->end_game_counter;
 			}
 
 			// increment shapes
@@ -218,10 +232,6 @@ namespace octet {
 					inc_cylinders();
 					break;
 				}
-			}
-
-			// destructor
-			~engine(void) {
 			}
 
 		};
