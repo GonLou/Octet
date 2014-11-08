@@ -1,13 +1,10 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Andy Thomason 2012-2014
-//
-// Modular Framework for OpenGLES2 rendering on multiple platforms.
-//
-// Adapted by 
 //				Goncalo Lourenco
 //
 //              Octet Shape Game 
+//
+//				the objective is to collect shapes indicated avoiding the remaining shapes
 
 using namespace std;
 
@@ -44,9 +41,8 @@ namespace octet {
 		ref<mesh_text> text_center;
 		ref<mesh_text> text_right;
 
-		int const TOTAL_OBJECTS = 40;
-
 		//construct a box
+		//
 		void add_box(mat4t_in modelToWorld, vec3_in size, material *mat) {
 			mesh_box *box = new mesh_box(size);
 			scene_node *node = new scene_node(modelToWorld, atom_);
@@ -57,6 +53,7 @@ namespace octet {
 		}
 
 		//construct a sphere
+		//
 		void add_sphere(mat4t_in modelToWorld, vec3_in size, material *mat, float radius) {
 			mesh_sphere *sphere = new mesh_sphere(size, radius, 2);
 			scene_node *node = new scene_node(modelToWorld, atom_);
@@ -67,6 +64,7 @@ namespace octet {
 		}
 
 		//construct a cylinder
+		//
 		void add_cylinder(mat4t_in modelToWorld, vec3_in size, material *mat) {
 			mesh_cylinder *cylinder = new mesh_cylinder(size, 1, 24);
 			scene_node *node = new scene_node(modelToWorld, atom_);
@@ -77,6 +75,7 @@ namespace octet {
 		}
 
 		//import a collada object
+		//
 		void add_collada(mat4t_in modelToWorld, vec3_in size, material *mat, string file_name) {
 
 			resource_dict dict;
@@ -101,6 +100,7 @@ namespace octet {
 		}
 
 		// create the random shapes with random colors and random vertical positions
+		//
 		void create_shape(int color, int shape_type, int object_time, int line) {
 			mat4t modelToWorld;
 			vec4 o_color;
@@ -150,6 +150,7 @@ namespace octet {
 		}
 
 		// generates the boxes for the greeble
+		//
 		void greeble_generator(float greeble_w, float greeble_h, float greeble_d, int greeble_seed, int angle, int x_start, int z_pos) {
 			mat4t modelToWorld;
 			int scale = 2;
@@ -169,7 +170,8 @@ namespace octet {
 
 		}
 
-		// creates a city to create a sense of surrounding space
+		// creates a city blocks 
+		//
 		void greeble_call(int z_pos) {
 			mat4t modelToWorld;
 
@@ -191,6 +193,7 @@ namespace octet {
 			}
 			else greeble_d = greeble_w;
 
+			// generates both sides of city blocks
 			greeble *city_gen = new greeble((int)nodes.size(), 0, z_pos);
 			for (unsigned g = 0; g < greeble_total; g++) {
 				greeble_generator(greeble_w, greeble_h, greeble_d, greeble_seed, angle[(int)rand() % 7], x_bound_left, z_pos);
@@ -211,6 +214,7 @@ namespace octet {
 		}
 
 		// generates the text in 3 different places
+		//
 		void display_text(ref<engine> start, string mid_text, int vx, int vy) {
 			// clear the text
 			text_left->clear();
@@ -228,7 +232,8 @@ namespace octet {
 			text_left->update();
 			text_center->update();
 			text_right->update();
-			overlay->render(vx, vy); // draw the text overlay
+			// draw the text overlay
+			overlay->render(vx, vy); 
 		}
 
 	public:
@@ -238,6 +243,9 @@ namespace octet {
 
 		/// this is called once OpenGL is initialized
 		void app_init() {
+			// total objects of the game
+			int const TOTAL_OBJECTS = 40;
+
 			app_scene = new visual_scene();
 			app_scene->create_default_camera_and_lights();
 			app_scene->get_camera_instance(0)->get_node()->translate(vec3(0, 5, 0));
@@ -256,6 +264,7 @@ namespace octet {
 			modelToWorld.translate(0.0f, 0.0f, 5.0f);
 			add_sphere(modelToWorld, vec3(1.0f, 1.0f, 1.0f), blue_sky, 39.0f);
 			modelToWorld.translate(0.0f, 0.0f, -5.0f);
+			printf("sky deployed\n");
 
 			// add the ground world (as a static object)
 			add_box(modelToWorld, vec3(6.0f, 0.5f, 50.0f), world_ground_material);
@@ -272,25 +281,32 @@ namespace octet {
 			modelToWorld.translate(38.60f, -0.05f, 0);
 			add_box(modelToWorld, vec3(10.0f, 0.5f, 50.0f), world_ground_material);
 			modelToWorld.translate(-5.0f, 0.0f, 0.0f);
+			printf("ground deployed\n");
 
 			// create 2 placards
 			modelToWorld.translate(-14.30f, 5.0f, 15.0f);
 			image *game_over_image = new image("assets/gonkas/game_over.jpg");
 			material *m_img01 = new material(game_over_image);
 			add_box(modelToWorld, vec3(10.7f, 3.7f, 0.0f), m_img01);
+			printf("placard #1 deployed\n");
 			image *end_game_image = new image("assets/gonkas/end_game.jpg");
 			material *m_img02 = new material(end_game_image);
 			add_box(modelToWorld, vec3(10.7f, 3.7f, 0.0f), m_img02);
-			modelToWorld.translate(14.30f, -5.0f, -15.0f);
+			printf("placard #2 deployed\n");
 
 			// add spaceship
 			image *spaceship_image = new image("assets/gonkas/spaceship_texture.jpg");
 			material *spaceship_material = new material(spaceship_image);
-			modelToWorld.rotateY(90);
+			modelToWorld.translate(14.30f, -5.0f, -15.0f);
+			modelToWorld.scale(0.30f, 0.30f, 0.30f);
+			//modelToWorld.rotateY(90);
 			modelToWorld.rotateX(90);
-			modelToWorld.translate(-20.0f, -14.0f, 1.8f);
-			add_collada(modelToWorld, vec3(1.0f, 1.0f, 1.0f), spaceship_material, "assets/gonkas/spaceship.dae");
+			modelToWorld.rotateZ(180);
+			//modelToWorld.translate(-20.0f, -14.0f, 1.8f);
+			modelToWorld.translate(48.0f, -80.0f, 0.0f);		
+			add_collada(modelToWorld, vec3(1.0f, 1.0f, 1.0f), spaceship_material, "assets/gonkas/ship.dae");
 			start->set_node_spaceship((int)nodes.size() - 1);
+			printf("ship deployed\n");
 
 			// random objects creation
 			int color;
@@ -335,10 +351,9 @@ namespace octet {
 			scene_node *placard_game_over = app_scene->get_mesh_instance(start->get_node_spaceship() - 2)->get_node();
 			placard_game_over->translate(vec3(0, 0, start->get_end_game_counter()*(1 - 2)));
 
-			// add the buildings
+			// add the city blocks
 			for (int i = -100; i < 0; i = i + 10) {
 				greeble_call(i);
-
 				printf("building #%d created\n", (i/10)*(1-2));
 			}
 
@@ -352,38 +367,40 @@ namespace octet {
 			int vx = 0, vy = 0;
 			get_viewport_size(vx, vy);
 			app_scene->begin_render(vx, vy);
+			const float displacement = 0.9f;
 
 			if (start->get_game_start()) {
 				start->inc_timer();
 
+				// animates the city blocks
 				for (unsigned i = 0; i < (city.size()); ++i) {
-					city[i]->move(app_scene);
-					printf("%d pos>%d\n", i, city[i]->get_position());
-					
+					city[i]->move(app_scene);					
 					if (city[i]->get_position() > 250) city[i]->reset(app_scene);
 				}
 
-				{  	// >>> begin keyboard
+				{  	// begin keyboard
 
 					//ship controls
 					scene_node *ship_controller = app_scene->get_mesh_instance(start->get_node_spaceship())->get_node();
 					if (start->get_ship_location() >= -12 && start->get_ship_location() <= 12) {
+						// left move
 						if (app::is_key_down(key_left) || app::is_key_going_up(key_left)) {
 							start->dec_ship_location();
-							ship_controller->translate(vec3(0, -0.3f, 0));
+							ship_controller->translate(vec3(displacement, 0, 0));
 							if (start->get_ship_location() <= -12)
 							{
-								ship_controller->translate(vec3(0, 0.3f, 0));
+								ship_controller->translate(vec3(displacement*(1 - 2), 0, 0));
 								start->inc_ship_location();
 							}
 
 						}
+						// right move
 						if (app::is_key_down(key_right) || app::is_key_going_up(key_right)) {
 							start->inc_ship_location();
-							ship_controller->translate(vec3(0, 0.3f, 0));
+							ship_controller->translate(vec3(displacement*(1 - 2), 0, 0));
 							if (start->get_ship_location() >= 12)
 							{
-								ship_controller->translate(vec3(0, -0.3f, 0));
+								ship_controller->translate(vec3(displacement, 0, 0));
 								start->dec_ship_location();
 							}
 						}
@@ -391,43 +408,45 @@ namespace octet {
 
 					//camera controls
 					scene_node *cam_node = app_scene->get_camera_instance(0)->get_node();
+					// left move
 					if (app::is_key_down('A')) {
 						cam_node->rotate(5, vec3(0, 1, 0));
 						start->set_camera_orientation(start->get_camera_orientation() + 1);
 					}
+					// key up reset to original camera position
 					if (app::is_key_up('A')) {
 						cam_node->rotate(-5 * start->get_camera_orientation(), vec3(0, 1, 0));
 						start->set_camera_orientation(0);
 					}
+					// right move
 					if (app::is_key_down('D')) {
 						cam_node->rotate(-5, vec3(0, 1, 0));
 						start->set_camera_orientation(start->get_camera_orientation() + 1);
 					}
+					// key up reset to original camera position
 					if (app::is_key_up('D')) {
 						cam_node->rotate(5 * start->get_camera_orientation(), vec3(0, 1, 0));
 						start->set_camera_orientation(0);
 					}
 
-					// toggle sound
+					// toggle sound on
 					if (app::is_key_down('M')) {
 						start->set_sound(true);
 					}
-					if (app::is_key_down('N')) {			
+					// toggle sound off
+					if (app::is_key_down('N')) {
 						PlaySound(NULL, 0, SND_ASYNC);
 						start->set_sound(false);
 					}
 
-					// quit
+					// quick quit
 					if (app::is_key_down('Q')) {
 						exit(0);
 					}
 
-				} // end keyboard <<<
-
-				// for control purposes only
-				/*for (unsigned i = 0; i < (object_tracking.size()-1); ++i)
-					printf("id = %d || color = %d || line = %d || shape = %d\n", i, object_tracking[i]->get_color(), object_tracking[i]->get_line(), object_tracking[i]->get_shape_type());*/
-
+				} // end keyboard
+				
+				// animates the active shapes
 				for (unsigned i = 0; i < (object_tracking.size()); ++i) {
 					if (object_tracking[i]->get_time() < start->get_timer()) { // if its time for the object to move
 						object_tracking[i]->move(object_tracking[i]->get_node(), app_scene);
@@ -442,6 +461,7 @@ namespace octet {
 						}
 					}
 
+					// collision detection
 					if (object_tracking[i]->get_position() > 140 && 
 						object_tracking[i]->get_is_alive()) { // if is at the space ship zone verifies collision
 						if (start->get_ship_location_transform() == object_tracking[i]->get_line()) { // verifies if collision occur
@@ -454,13 +474,13 @@ namespace octet {
 								start->set_points(((start->get_lives())*2 * 10)+start->get_points());
 							}
 							else {
-								start->dec_lives(); // decrement live
+								start->dec_lives(); // decrement one live
 								if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/collide.wav"), NULL, SND_FILENAME | SND_ASYNC);
 								object_tracking[i]->set_is_alive(false);
 								start->set_number_objects(start->get_number_objects() - 1);
 							}
 						}
-						else { // if not collsion
+						else { // if not collision the object just goes out of screen
 							if (object_tracking[i]->get_position() > 160) {
 								object_tracking[i]->set_is_alive(false);
 								start->set_number_objects(start->get_number_objects() - 1);
@@ -469,14 +489,17 @@ namespace octet {
 					}
 				}
 
-				if ((object_tracking.size() * 50 + 150) < (start->get_timer())) { // the game ended with sucess
+				// the game ended with sucess
+				if ((object_tracking.size() * 50 + 150) < (start->get_timer())) {
 					// play the background music
 					if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/music.wav"), NULL, SND_LOOP | SND_ASYNC);
 
 					start->set_game_start(false);
 				}
 
-				if (start->get_lives() < 0) { // game over
+				// game over
+				if (start->get_lives() < 0) {
+					// play the explosion sound
 					if (start->get_sound()) PlaySound(TEXT("../../../assets/gonkas/explosion.wav"), NULL, SND_FILENAME | SND_ASYNC);
 					start->set_game_start(false);
 				}

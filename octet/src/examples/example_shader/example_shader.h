@@ -24,8 +24,8 @@ namespace octet {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
 
-      param_shader *shader = new param_shader("shaders/default.vs", "shaders/spots.fs");
-      custom_mat = new material(vec4(1, 1, 1, 1), shader);
+      param_shader *shader = new param_shader("shaders/default.vs", "shaders/default_solid.fs");
+      custom_mat = new material(vec4(1, 0, 0, 1), shader);
       atom_t atom_num_spots = app_utils::get_atom("num_spots");
       float val = 4;
       num_spots = custom_mat->add_uniform(&val, atom_num_spots, GL_FLOAT, 1, param::stage_fragment);

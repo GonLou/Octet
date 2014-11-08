@@ -374,7 +374,7 @@ namespace octet { namespace scene {
         node->access_nodeToParent().translate(100, 100, 100);
         node->access_nodeToParent().rotateX(45);
         node->access_nodeToParent().rotateY(45);
-        _light->set_color(vec4(1, 1, 1, 1));
+		_light->set_color(vec4(1, 1, 1, 1));
         _light->set_kind(atom_directional);
         li->set_node(node);
         li->set_light(_light);
