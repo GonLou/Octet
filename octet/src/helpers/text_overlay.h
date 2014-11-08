@@ -19,9 +19,9 @@ namespace octet { namespace helpers {
     text_overlay() {
       image *page = new image("assets/courier_18_0.gif");
       page->load();
-      font = new bitmap_font(
-        page->get_width(), page->get_height(), "assets/courier_18.fnt"
-      );
+	  font = new bitmap_font(
+		  page->get_width(), page->get_height(), "assets/courier_18.fnt"
+		  );
 
       // Make a scene for the text overlay using an ortho camera
       // that works in screen pixels.

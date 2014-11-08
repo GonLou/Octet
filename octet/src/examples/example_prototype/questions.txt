@@ -1,0 +1,1 @@
+1. Is preferable to do a increment function or just call the set_something(get_something+1) ?
