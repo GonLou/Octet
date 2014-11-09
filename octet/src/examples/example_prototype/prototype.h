@@ -1,48 +1,57 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-//				Goncalo Lourenco
-//
-//              Octet Shape Game 
-//
-//				the objective is to collect shapes indicated avoiding the remaining shapes
+////////////////////////////////////////////////////////////////////////////////
+///
+/// Goncalo Lourenco 2014
+///
+/// Octet Shape Game 
+///
+/// the objective is to collect shapes indicated avoiding the remaining shapes
+///
+/// version 1.0
+///
+/// date 09/11/2014
 
 using namespace std;
 
 #include <vector>
 
-#include "shape.h"
+#include "shape.h" 
 
 #include "engine.h"
 
 #include "greeble.h"
 
 namespace octet {
-	/// Octet Shape Game
-
+	/// Octet Shape Game 
+	/// main class
 	class prototype : public app {
-		// scene for the game
+		// scene for the game 
 		ref<visual_scene> app_scene;
 		dynarray<scene_node*> nodes;
 		collada_builder loader;
 
-		// track of objects from game
+		// track of objects from game 
 		dynarray<ref<shape> > object_tracking;
 
 		dynarray<ref<greeble> > city;
 
-		// variables for the game
+		// variables for the game 
 		ref<engine> start;
 		
-		// helper for drawing text
+		// helper for drawing text 
 		ref<text_overlay> overlay;
 
-		// text mesh object for overlay.
+		// text mesh object for overlay 
 		ref<mesh_text> text_left;
 		ref<mesh_text> text_center;
 		ref<mesh_text> text_right;
 
-		//construct a box
-		//
+		/**
+			\details Construct a box
+			\param modelToWorld
+			\param size
+			\param mat
+			\return void
+		*/
 		void add_box(mat4t_in modelToWorld, vec3_in size, material *mat) {
 			mesh_box *box = new mesh_box(size);
 			scene_node *node = new scene_node(modelToWorld, atom_);
@@ -52,8 +61,14 @@ namespace octet {
 			app_scene->add_mesh_instance(new mesh_instance(node, box, mat));
 		}
 
-		//construct a sphere
-		//
+		/**
+			\details Construct a sphere
+			\param modelToWorld
+			\param size
+			\param mat
+			\param radius
+			\return void
+		*/
 		void add_sphere(mat4t_in modelToWorld, vec3_in size, material *mat, float radius) {
 			mesh_sphere *sphere = new mesh_sphere(size, radius, 2);
 			scene_node *node = new scene_node(modelToWorld, atom_);
@@ -63,8 +78,13 @@ namespace octet {
 			app_scene->add_mesh_instance(new mesh_instance(node, sphere, mat));
 		}
 
-		//construct a cylinder
-		//
+		/**
+			\details Construct a Cylinder
+			\param modelToWorld
+			\param size
+			\param mat
+			\return void
+		*/
 		void add_cylinder(mat4t_in modelToWorld, vec3_in size, material *mat) {
 			mesh_cylinder *cylinder = new mesh_cylinder(size, 1, 24);
 			scene_node *node = new scene_node(modelToWorld, atom_);
@@ -74,8 +94,14 @@ namespace octet {
 			app_scene->add_mesh_instance(new mesh_instance(node, cylinder, mat));
 		}
 
-		//import a collada object
-		//
+		/**
+			\details Import a collada object
+			\param modelToWorld
+			\param size
+			\param mat
+			\param file_name
+			\return void
+		*/
 		void add_collada(mat4t_in modelToWorld, vec3_in size, material *mat, string file_name) {
 
 			resource_dict dict;
@@ -99,13 +125,19 @@ namespace octet {
 
 		}
 
-		// create the random shapes with random colors and random vertical positions
-		//
+		/**
+			\details Create the random shapes with random colors and random vertical positions
+			\param modelToWorld
+			\param size
+			\param mat
+			\param file_name
+			\return void
+		*/
 		void create_shape(int color, int shape_type, int object_time, int line) {
 			mat4t modelToWorld;
 			vec4 o_color;
 
-			// define the object color
+			/// define the object color
 			switch (color) {
 			case 1: // red color
 				o_color = (vec4(1, 0, 0, 1));
@@ -119,7 +151,7 @@ namespace octet {
 			}
 			material *m_color = new material(o_color);
 
-			// define the vertical line alignment position
+			/// define the vertical line alignment position
 			switch (line) {
 			case 1: // left
 				modelToWorld.translate(-3.0f, 2.0f, -50.0f);
@@ -132,7 +164,7 @@ namespace octet {
 				break;
 			}
 
-			// define the object shape type
+			/// define the object shape type
 			switch (shape_type) {
 			case 1: // cube
 				add_box(modelToWorld, vec3(0.7f, 0.7f, 0.7f), m_color);
@@ -149,8 +181,15 @@ namespace octet {
 			object_tracking.push_back(object_shape);
 		}
 
-		// generates the boxes for the greeble
-		//
+		/**
+			\details Generates the boxes for the greeble
+			\param greeble_w : the width of the geometry
+			\param greeble_h : the height of the geometry
+			\param greeble_d : the deep of the geometry
+			\param x_start : where the geometries starts
+			\param z_pos : the deep value
+			\return void
+		*/
 		void greeble_generator(float greeble_w, float greeble_h, float greeble_d, int greeble_seed, int angle, int x_start, int z_pos) {
 			mat4t modelToWorld;
 			int scale = 2;
@@ -170,8 +209,11 @@ namespace octet {
 
 		}
 
-		// creates a city blocks 
-		//
+		/**
+			\details Creates a city blocks 
+			\param z_pos : the deep value
+			\return void
+		*/
 		void greeble_call(int z_pos) {
 			mat4t modelToWorld;
 
@@ -193,7 +235,7 @@ namespace octet {
 			}
 			else greeble_d = greeble_w;
 
-			// generates both sides of city blocks
+			/// generates both sides of city blocks
 			greeble *city_gen = new greeble((int)nodes.size(), 0, z_pos);
 			for (unsigned g = 0; g < greeble_total; g++) {
 				greeble_generator(greeble_w, greeble_h, greeble_d, greeble_seed, angle[(int)rand() % 7], x_bound_left, z_pos);
@@ -213,14 +255,20 @@ namespace octet {
 
 		}
 
-		// generates the text in 3 different places
-		//
+		/**
+			\details generates the text in 3 different placess
+			\param start
+			\param mid_text
+			\param vx 
+			\param vy 
+			\return void
+		*/
 		void display_text(ref<engine> start, string mid_text, int vx, int vy) {
-			// clear the text
+			/// clear the text
 			text_left->clear();
 			text_center->clear();
 			text_right->clear();
-			// format the text
+			/// format the text
 			text_left->format(
 				"active shape: %s\nobjects collected:\n\t\tCube     -> %d\n\t\tSphere   -> %d\n\t\tCylinder -> %d\n",
 				start->get_active_shape_text(), start->get_cubes(), start->get_spheres(), start->get_cylinders()
@@ -228,7 +276,7 @@ namespace octet {
 			text_center->format("%s", mid_text);
 			text_right->format("lives %d\n%s\n%d shapes\n%d points",
 				start->get_lives(), start->get_sound_text(), start->get_number_objects(), start->get_points());
-			// convert it to a mesh.
+			/// convert it to a mesh.
 			text_left->update();
 			text_center->update();
 			text_right->update();
@@ -237,11 +285,17 @@ namespace octet {
 		}
 
 	public:
-		/// this is called when we construct the class before everything is initialised.
+		/**
+			\details This is called when we construct the class before everything is initialised.
+			\param argc
+			\param argv
+		*/
 		prototype(int argc, char **argv) : app(argc, argv) {
 		}
 
-		/// this is called once OpenGL is initialized
+		/**
+			\details This is called once OpenGL is initialized
+		*/
 		void app_init() {
 			// total objects of the game
 			int const TOTAL_OBJECTS = 40;
